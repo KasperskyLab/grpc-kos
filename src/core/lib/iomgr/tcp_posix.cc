@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2022 AO Kaspersky Lab. All Rights Reserved
+ *
  */
 
 #include <grpc/support/port_platform.h>
@@ -33,6 +35,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#ifdef __KOS__ // 03.11.2022 adapted for KasperskyOS
+#include <sys/uio.h>
+#endif
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -1343,7 +1348,10 @@ void tcp_shutdown_buffer_list(grpc_tcp* tcp) {
   }
 }
 
-#if defined(IOV_MAX) && IOV_MAX < 260
+#if defined(__KOS__) // 03.11.2022 adapted for KasperskyOS
+// workaround for KOS bug 5945059: IOV_MAX doesn't contain the actual value
+#define MAX_WRITE_IOVEC 10
+#elif defined(IOV_MAX) && IOV_MAX < 260
 #define MAX_WRITE_IOVEC IOV_MAX
 #else
 #define MAX_WRITE_IOVEC 260

@@ -1,0 +1,8 @@
+# C/C++ build outputs
+.build/
+build/
+
+# Visual Studio Code artifacts
+.cache/*
+.vscode/*
+.history/

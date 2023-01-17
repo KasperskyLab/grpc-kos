@@ -149,6 +149,7 @@ bloaty-build/
 
 # cmake build files
 **/cmake/build/
+/cmake/build_kos
 
 # Visual Studio Code artifacts
 .cache/*
