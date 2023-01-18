@@ -28,7 +28,7 @@ export LANG=C
 export TARGET="aarch64-kos"
 export PKG_CONFIG=""
 # Please specify the actual path to Kaspersky OS SDK on host system
-export SDK_PREFIX="/opt/KasperskyOS-Community-Edition-1.1.0.23"
+export SDK_PREFIX="/opt/KasperskyOS-Community-Edition-1.1.1.13"
 export PATH="$SDK_PREFIX/toolchain/bin:$PATH"
 export LD_LIBRARY_PATH=$SDK_PREFIX/toolchain/lib
 export KOS_INSTALL=$HOME/.local/kos

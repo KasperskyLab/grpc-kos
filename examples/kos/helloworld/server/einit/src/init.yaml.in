@@ -12,7 +12,6 @@ entities:
 @INIT_GreeterServer_ENTITY_CONNECTIONS+@
   args:
   $<TARGET_PROPERTY:GreeterServer,EXTRA_ARGS>
-@INIT_GreeterServer_ENTITY_ARGS+@
   env:
     VFS_FILESYSTEM_BACKEND: client:kl.VfsRamFs
     VFS_NETWORK_BACKEND: client:kl.VfsNet

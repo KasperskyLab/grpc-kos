@@ -23,7 +23,7 @@ Both 'client' and 'server' directories contain scripts to build and run the resu
 - cross-build.sh for KasperskyOS
 
 The scripts were written with the following assumptions:
-- the version of KasperskyOS Community Edition is 1.1.0.24
+- the version of KasperskyOS Community Edition is 1.1.1.13
 - gRPC is installed in ~/.local directory
 - gRPC for KasperskyOS is installed in ~/.local/kos directory
 
