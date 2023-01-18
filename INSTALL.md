@@ -37,8 +37,8 @@ installed.
 For build and installation you need to run the script:
 
 ```sh
- $ git clone --recurse-submodules -b v1.48.0 --depth 1 --shallow-submodules https://github.com/grpc/grpc
- $ cd grpc
+ $ git clone --recurse-submodules --depth 1 --shallow-submodules https://github.com/KasperskyLab/grpc-kos.git
+ $ cd grpc-kos
  $ ./cross-build-kos.sh
 ```
 
