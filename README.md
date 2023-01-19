@@ -14,6 +14,8 @@ See [INSTALL](INSTALL.md) for installation instructions for various platforms.
 
 See [tools/run_tests](tools/run_tests) for more guidance on how to run various test suites (e.g. unit tests, interop tests, benchmarks).
 
+See [helloworld/README](examples/kos/helloworld/README.md) for Hello World example on KasperskyOS.
+
 # Repository Structure & Status
 
 This repository contains source code for gRPC libraries for multiple languages written on top of shared C core library [src/core](src/core).
@@ -111,6 +113,9 @@ MacOS® is trademark of Apple Inc., registered in the U.S. and other countries a
 Objective-C® is trademark of Apple Inc., registered in the U.S. and other countries and regions.
 Python® is a trademark or registered trademark of the Python Software Foundation.
 Windows™ is trademark of the Microsoft group of companies.
+
+# Contributing
+We'll follow the parent project contributing rules but would consider to accept only KasperskyOS-specific changes, so for that it is advised to use the following [instruction](CONTRIBUTING.md).
 
 # License
 

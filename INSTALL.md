@@ -20,7 +20,7 @@ refer to these documents:
 ## KasperskyOS
 
 For a default build and use, you need to install the KasperskyOS Community Edition SDK  on your system. The latest version of the SDK can be downloaded from this [link](https://os.kaspersky.com/development/).
-The gRPC source code has been checked on the KasperskyOS Community Edition SDK version 1.1.0.
+The gRPC source code has been checked on the KasperskyOS Community Edition SDK version 1.1.0.24.
 
 ## Compiler `protoc`
 
