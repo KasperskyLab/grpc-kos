@@ -1,7 +1,7 @@
 ## HelloWorld Example
 
 ### Description
-gRPC HelloWorld C++ example adapted for KaspeskyOS.
+This is gRPC HelloWorld C++ example adapted for KaspeskyOS.
 The example shows client-server interaction via secure (using SSL/TLS authentication) or insecure RPC channel.
 The example directory contains 3 sub-directories:
 - **client** - the source code of client (GreeterClient)
