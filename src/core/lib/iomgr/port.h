@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2022 AO Kaspersky Lab. All Rights Reserved
+ *
  */
 #ifndef GRPC_CORE_LIB_IOMGR_PORT_H
 #define GRPC_CORE_LIB_IOMGR_PORT_H
@@ -158,6 +160,14 @@
 #define GRPC_HAVE_IFADDRS 1
 #define GRPC_HAVE_IPV6_RECVPKTINFO 1
 #define GRPC_HAVE_SO_NOSIGPIPE 1
+#define GRPC_HAVE_UNIX_SOCKET 1
+#define GRPC_POSIX_FORK 1
+#define GRPC_POSIX_NO_SPECIAL_WAKEUP_FD 1
+#define GRPC_POSIX_SOCKET 1
+#define GRPC_POSIX_SOCKETUTILS 1
+#define GRPC_POSIX_WAKEUP_FD 1
+#elif defined(GPR_KOS) // 03.11.2022 adapted for KasperskyOS
+#define GRPC_HAVE_IFADDRS 1
 #define GRPC_HAVE_UNIX_SOCKET 1
 #define GRPC_POSIX_FORK 1
 #define GRPC_POSIX_NO_SPECIAL_WAKEUP_FD 1

@@ -1,3 +1,11 @@
+Kaspersky OS modification of gRPC
+
+© 2022 AO Kaspersky Lab. All Rights Reserved.
+
+Kaspersky OS modification of gRPC is an adapted version of the gRPC project for use on Kaspersky OS.
+
+This software contains code derived from the gRPC project.
+
 Copyright 2014 gRPC authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");

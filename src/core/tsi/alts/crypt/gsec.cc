@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2022 AO Kaspersky Lab. All Rights Reserved
+ *
  */
 
 #include <grpc/support/port_platform.h>
@@ -22,6 +24,10 @@
 
 #include <stdio.h>
 #include <string.h>
+
+#ifdef __KOS__ // 03.11.2022 adapted for KasperskyOS
+#include <sys/uio.h>
+#endif
 
 #include <grpc/support/alloc.h>
 

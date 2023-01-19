@@ -18,6 +18,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# © 2022 AO Kaspersky Lab. All Rights Reserved
+#
 
 
 
@@ -204,7 +207,7 @@ set(gRPC_ABSL_USED_TARGETS
 
 set(gRPC_USE_PROTO_LITE OFF CACHE BOOL "Use the protobuf-lite library")
 
-if(UNIX)
+if(UNIX OR KOS) # 03.11.2022 adapted for KasperskyOS
   if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(_gRPC_PLATFORM_LINUX ON)
   elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -301,12 +304,12 @@ if (gRPC_XDS_USER_AGENT_IS_CSHARP)
   add_definitions("-DGRPC_XDS_USER_AGENT_NAME_SUFFIX=\"csharp\"" "-DGRPC_XDS_USER_AGENT_VERSION_SUFFIX=\"2.48.0\"")
 endif()
 
-if(UNIX AND NOT HAIKU)
+if((UNIX OR KOS) AND NOT HAIKU) # 03.11.2022 adapted for KasperskyOS
   # -pthread does more than -lpthread
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads)
   set(_gRPC_ALLTARGETS_LIBRARIES ${CMAKE_DL_LIBS} m Threads::Threads)
-  if(_gRPC_PLATFORM_LINUX OR _gRPC_PLATFORM_POSIX)
+  if((_gRPC_PLATFORM_LINUX OR _gRPC_PLATFORM_POSIX) AND NOT KOS) # 03.11.2022 adapted for KasperskyOS
     set(_gRPC_ALLTARGETS_LIBRARIES ${_gRPC_ALLTARGETS_LIBRARIES} rt)
   endif()
 endif()
@@ -513,7 +516,7 @@ function(protobuf_generate_grpc_cpp_with_import_path_correction FILE_LOCATION IM
          --plugin=protoc-gen-grpc=${_gRPC_CPP_PLUGIN}
          ${_protobuf_include_path}
          ${REL_FIL}
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_LOCATION} ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} grpc_cpp_plugin
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_LOCATION} ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} ${_gRPC_CPP_PLUGIN} # 03.11.2022 adapted for KasperskyOS
     WORKING_DIRECTORY ${_gRPC_PROTO_SRCS_DIR}
     COMMENT "Running gRPC C++ protocol buffer compiler for ${IMPORT_PATH}"
     VERBATIM)
@@ -4243,7 +4246,7 @@ if(gRPC_INSTALL)
   )
 endif()
 
-
+if(gRPC_BUILD_TESTS) # 03.11.2022 adapted for KasperskyOS
 
 add_executable(gen_hpack_tables
   tools/codegen/core/gen_hpack_tables.cc
@@ -4271,8 +4274,6 @@ target_link_libraries(gen_hpack_tables
   gpr
 )
 
-
-if(gRPC_BUILD_TESTS)
 
 add_executable(alloc_test
   test/core/gpr/alloc_test.cc

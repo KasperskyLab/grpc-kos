@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2022 AO Kaspersky Lab. All Rights Reserved
+ *
  */
 
 #ifndef GRPC_IMPL_CODEGEN_PORT_PLATFORM_H
@@ -364,6 +366,30 @@
 #define _BSD_SOURCE
 #endif
 #define GPR_NETBSD 1
+#define GPR_CPU_POSIX 1
+#define GPR_GCC_ATOMIC 1
+#define GPR_GCC_TLS 1
+#define GPR_POSIX_LOG 1
+#define GPR_POSIX_ENV 1
+#define GPR_POSIX_TMPFILE 1
+#define GPR_POSIX_STAT 1
+#define GPR_POSIX_STRING 1
+#define GPR_POSIX_SUBPROCESS 1
+#define GPR_POSIX_SYNC 1
+#define GPR_POSIX_TIME 1
+#define GPR_GETPID_IN_UNISTD_H 1
+#define GPR_SUPPORT_CHANNELS_FROM_FD 1
+#ifdef _LP64
+#define GPR_ARCH_64 1
+#else /* _LP64 */
+#define GPR_ARCH_32 1
+#endif /* _LP64 */
+#elif defined(__KOS__) // 03.11.2022 adapted for KasperskyOS
+#define GPR_PLATFORM_STRING "KasperskyOS"
+#ifndef _BSD_SOURCE
+#define _BSD_SOURCE
+#endif
+#define GPR_KOS 1
 #define GPR_CPU_POSIX 1
 #define GPR_GCC_ATOMIC 1
 #define GPR_GCC_TLS 1

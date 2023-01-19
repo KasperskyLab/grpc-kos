@@ -1,104 +1,122 @@
-# gRPC – An RPC library and framework
+KasperskyOS modification of grpc - An RPC library and framework adaptation for KasperskyOS
+===================================
 
-gRPC is a modern, open source, high-performance remote procedure call (RPC)
-framework that can run anywhere. gRPC enables client and server applications to
-communicate transparently, and simplifies the building of connected systems.
+Copyright 2022 Kaspersky Lab.
 
-<table>
-  <tr>
-    <td><b>Homepage:</b></td>
-    <td><a href="https://grpc.io/">grpc.io</a></td>
-  </tr>
-  <tr>
-    <td><b>Mailing List:</b></td>
-    <td><a href="https://groups.google.com/forum/#!forum/grpc-io">grpc-io@googlegroups.com</a></td>
-  </tr>
-</table>
+# Documentation
 
-[![Join the chat at https://gitter.im/grpc/grpc](https://badges.gitter.im/grpc/grpc.svg)](https://gitter.im/grpc/grpc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+The gRPC version includes KasperskyOS modification of gRPC. The modification is based on the original version of [grpc 1.48.0](https://github.com/grpc/grpc/tree/v1.48.0).
+You can find more detailed documentation and examples in the [doc](doc) and [examples](examples) directories respectively.
 
-## To start using gRPC
+# Installation & Testing
 
-To maximize usability, gRPC supports the standard method for adding dependencies
-to a user's chosen language (if there is one). In most languages, the gRPC
-runtime comes as a package available in a user's language package manager.
+See [INSTALL](INSTALL.md) for installation instructions for various platforms.
 
-For instructions on how to use the language-specific gRPC runtime for a project,
-please refer to these documents
+See [tools/run_tests](tools/run_tests) for more guidance on how to run various test suites (e.g. unit tests, interop tests, benchmarks).
 
-- [C++](src/cpp): follow the instructions under the `src/cpp` directory
-- [C#](src/csharp): NuGet package `Grpc`
-- [Dart](https://github.com/grpc/grpc-dart): pub package `grpc`
-- [Go](https://github.com/grpc/grpc-go): `go get google.golang.org/grpc`
-- [Java](https://github.com/grpc/grpc-java): Use JARs from Maven Central
-  Repository
-- [Kotlin](https://github.com/grpc/grpc-kotlin): Use JARs from Maven Central
-  Repository
-- [Node](https://github.com/grpc/grpc-node): `npm install grpc`
-- [Objective-C](src/objective-c): Add `gRPC-ProtoRPC` dependency to podspec
-- [PHP](src/php): `pecl install grpc`
-- [Python](src/python/grpcio): `pip install grpcio`
-- [Ruby](src/ruby): `gem install grpc`
-- [WebJS](https://github.com/grpc/grpc-web): follow the grpc-web instructions
+See [helloworld/README](examples/kos/helloworld/README.md) for Hello World example on KasperskyOS.
 
-Per-language quickstart guides and tutorials can be found in the
-[documentation section on the grpc.io website](https://grpc.io/docs/). Code
-examples are available in the [examples](examples) directory.
+# Repository Structure & Status
 
-Precompiled bleeding-edge package builds of gRPC `master` branch's `HEAD` are
-uploaded daily to [packages.grpc.io](https://packages.grpc.io).
+This repository contains source code for gRPC libraries for multiple languages written on top of shared C core library [src/core](src/core).
 
-## To start developing gRPC
+| Language                | Source                              | Status  |KasperskyOS adaptation|
+|-------------------------|-------------------------------------|---------|----------------------|
+| Shared C [core library] | [src/core](src/core)                | 1.8     |     Yes              |
+| C++                     | [src/cpp](src/cpp)                  | 1.8     |     Yes              |
+| Ruby                    | [src/ruby](src/ruby)                | 1.8     |     No               |
+| Python                  | [src/python](src/python)            | 1.8     |     No               |
+| PHP                     | [src/php](src/php)                  | 1.8     |     No               |
+| C#                      | [src/csharp](src/csharp)            | 1.8     |     No               |
+| Objective-C             | [src/objective-c](src/objective-c)  | 1.8     |     No               |
 
-Contributions are welcome!
+Java source code is in the [grpc-java](http://github.com/grpc/grpc-java)
+repository. Go source code is in the
+[grpc-go](http://github.com/grpc/grpc-go) repository. NodeJS source code is in the
+[grpc-node](https://github.com/grpc/grpc-node) repository.
+Please, pay attention that the Java, Go and NodeJS code has not be adapted for KaspersyOS.
 
-Please read [How to contribute](CONTRIBUTING.md) which will guide you through
-the entire workflow of how to build the source code, how to run the tests, and
-how to contribute changes to the gRPC codebase. The "How to contribute" document
-also contains info on how the contribution process works and contains best
-practices for creating contributions.
+Code examples for KasperskyOS are available in the [examples/kos](examples/kos) directory.
 
-## Troubleshooting
+# Overview
 
-Sometimes things go wrong. Please check out the
-[Troubleshooting guide](TROUBLESHOOTING.md) if you are experiencing issues with
-gRPC.
 
-## Performance
+Remote Procedure Calls (RPCs) provide a useful abstraction for building
+distributed applications and services. The libraries in this repository
+provide a concrete implementation of the gRPC protocol, layered over HTTP/2.
+These libraries enable communication between clients and servers using any
+combination of the supported languages.
 
-See the
-[Performance dashboard](https://grafana-dot-grpc-testing.appspot.com/)
-for performance numbers of master branch daily builds.
 
-## Concepts
+## Interface
 
-See [gRPC Concepts](CONCEPTS.md)
 
-## About This Repository
+Developers using gRPC typically start with the description of an RPC service
+(a collection of methods), and generate client and server side interfaces
+which they use on the client-side and implement on the server side.
 
-This repository contains source code for gRPC libraries implemented in multiple
-languages written on top of a shared C core library [src/core](src/core).
+By default, gRPC uses [Protocol Buffers](https://github.com/google/protobuf) as the
+gRPC Interface Definition Language (IDL) for describing both the service interface
+and the structure of the payload messages. It is possible to use other
+alternatives if desired.
 
-Libraries in different languages may be in various states of development. We are
-seeking contributions for all of these libraries:
+### Surface API
+Starting from an interface definition in a .proto file, gRPC provides
+Protocol Compiler plugins that generate Client- and Server-side APIs.
+gRPC users typically call into these APIs on the Client side and implement
+the corresponding API on the server side.
 
-| Language                | Source                             |
-| ----------------------- | ---------------------------------- |
-| Shared C [core library] | [src/core](src/core)               |
-| C++                     | [src/cpp](src/cpp)                 |
-| Ruby                    | [src/ruby](src/ruby)               |
-| Python                  | [src/python](src/python)           |
-| PHP                     | [src/php](src/php)                 |
-| C# (core library based) | [src/csharp](src/csharp)           |
-| Objective-C             | [src/objective-c](src/objective-c) |
+#### Synchronous vs. asynchronous
+Synchronous RPC calls, that block until a response arrives from the server, are
+the closest approximation to the abstraction of a procedure call that RPC
+aspires to.
 
-| Language             | Source repo                                        |
-| -------------------- | -------------------------------------------------- |
-| Java                 | [grpc-java](https://github.com/grpc/grpc-java)     |
-| Kotlin               | [grpc-kotlin](https://github.com/grpc/grpc-kotlin) |
-| Go                   | [grpc-go](https://github.com/grpc/grpc-go)         |
-| NodeJS               | [grpc-node](https://github.com/grpc/grpc-node)     |
-| WebJS                | [grpc-web](https://github.com/grpc/grpc-web)       |
-| Dart                 | [grpc-dart](https://github.com/grpc/grpc-dart)     |
-| .NET (pure C# impl.) | [grpc-dotnet](https://github.com/grpc/grpc-dotnet) |
-| Swift                | [grpc-swift](https://github.com/grpc/grpc-swift) |
+On the other hand, networks are inherently asynchronous and in many scenarios,
+it is desirable to have the ability to start RPCs without blocking the current
+thread.
+
+The gRPC programming surface in most languages comes in both synchronous and
+asynchronous flavors.
+
+
+## Streaming
+
+gRPC supports streaming semantics, where either the client or the server (or both)
+send a stream of messages on a single RPC call. The most general case is
+Bidirectional Streaming where a single gRPC call establishes a stream where both
+the client and the server can send a stream of messages to each other. The streamed
+messages are delivered in the order they were sent.
+
+
+# Protocol
+
+The [gRPC protocol](doc/PROTOCOL-HTTP2.md) specifies the abstract requirements for communication between
+clients and servers. A concrete embedding over HTTP/2 completes the picture by
+fleshing out the details of each of the required operations.
+
+## Abstract gRPC protocol
+A gRPC comprises of a bidirectional stream of messages, initiated by the client. In the client-to-server direction, this stream begins with a mandatory `Call Header`, followed by optional `Initial-Metadata`, followed by zero or more `Payload Messages`. The server-to-client direction contains an optional `Initial-Metadata`, followed by zero or more `Payload Messages` terminated with a mandatory `Status` and optional `Status-Metadata` (or `Trailing-Metadata`).
+
+## Implementation over HTTP/2
+The abstract gRPC protocol is implemented over [HTTP/2](https://http2.github.io/). gRPC bidirectional streams are mapped to HTTP/2 streams. The contents of `Call Header` and `Initial Metadata` are sent as HTTP/2 headers and subject to HPACK compression. `Payload Messages` are serialized into a byte stream of length prefixed gRPC frames which are then fragmented into HTTP/2 frames at the sender and reassembled at the receiver. `Status` and `Trailing-Metadata` are sent as HTTP/2 trailing headers (or trailers).
+
+## Flow Control
+gRPC inherits the flow control mechanisms in HTTP/2 and uses them to enable fine-grained control of the amount of memory used for buffering in-flight messages.
+
+# Trademarks
+
+gRPC® is a registered trademark of The Linux Foundation in the United States and/or other countries.
+
+Java is a trademark or registered trademark of Oracle Corporation and/or its affiliates.
+Linux® is the registered trademark of Linus Torvalds in the U.S. and other countries.
+MacOS® is trademark of Apple Inc., registered in the U.S. and other countries and regions.
+Objective-C® is trademark of Apple Inc., registered in the U.S. and other countries and regions.
+Python® is a trademark or registered trademark of the Python Software Foundation.
+Windows™ is trademark of the Microsoft group of companies.
+
+# Contributing
+We'll follow the parent project contributing rules but would consider to accept only KasperskyOS-specific changes, so for that it is advised to use the following [instruction](CONTRIBUTING.md).
+
+# License
+
+See gRPC license [here](LICENSE).
