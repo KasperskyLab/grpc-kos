@@ -19,11 +19,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# © 2022 AO Kaspersky Lab. All Rights Reserved
-#
-
-
-
+# © 2024 AO Kaspersky Lab
+# Licensed under the Apache License, Version 2.0 (the "License")
 
 cmake_minimum_required(VERSION 3.5.1)
 
@@ -94,6 +91,9 @@ set_property(CACHE gRPC_PROTOBUF_PACKAGE_TYPE PROPERTY STRINGS "CONFIG" "MODULE"
 if(gRPC_BUILD_TESTS)
   set(gRPC_BENCHMARK_PROVIDER "module" CACHE STRING "Provider of benchmark library")
   set_property(CACHE gRPC_BENCHMARK_PROVIDER PROPERTY STRINGS "module" "package")
+  if(KOS)
+    add_compile_definitions(GRPC_PORT_ISOLATED_RUNTIME=1)
+  endif()
 else()
   set(gRPC_BENCHMARK_PROVIDER "none")
 endif()
@@ -207,7 +207,7 @@ set(gRPC_ABSL_USED_TARGETS
 
 set(gRPC_USE_PROTO_LITE OFF CACHE BOOL "Use the protobuf-lite library")
 
-if(UNIX OR KOS) # 03.11.2022 adapted for KasperskyOS
+if(UNIX OR KOS)
   if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(_gRPC_PLATFORM_LINUX ON)
   elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -304,12 +304,12 @@ if (gRPC_XDS_USER_AGENT_IS_CSHARP)
   add_definitions("-DGRPC_XDS_USER_AGENT_NAME_SUFFIX=\"csharp\"" "-DGRPC_XDS_USER_AGENT_VERSION_SUFFIX=\"2.48.0\"")
 endif()
 
-if((UNIX OR KOS) AND NOT HAIKU) # 03.11.2022 adapted for KasperskyOS
+if((UNIX OR KOS) AND NOT HAIKU)
   # -pthread does more than -lpthread
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads)
   set(_gRPC_ALLTARGETS_LIBRARIES ${CMAKE_DL_LIBS} m Threads::Threads)
-  if((_gRPC_PLATFORM_LINUX OR _gRPC_PLATFORM_POSIX) AND NOT KOS) # 03.11.2022 adapted for KasperskyOS
+  if((_gRPC_PLATFORM_LINUX OR _gRPC_PLATFORM_POSIX) AND NOT KOS)
     set(_gRPC_ALLTARGETS_LIBRARIES ${_gRPC_ALLTARGETS_LIBRARIES} rt)
   endif()
 endif()
@@ -516,7 +516,7 @@ function(protobuf_generate_grpc_cpp_with_import_path_correction FILE_LOCATION IM
          --plugin=protoc-gen-grpc=${_gRPC_CPP_PLUGIN}
          ${_protobuf_include_path}
          ${REL_FIL}
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_LOCATION} ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} ${_gRPC_CPP_PLUGIN} # 03.11.2022 adapted for KasperskyOS
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_LOCATION} ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} ${_gRPC_CPP_PLUGIN}
     WORKING_DIRECTORY ${_gRPC_PROTO_SRCS_DIR}
     COMMENT "Running gRPC C++ protocol buffer compiler for ${IMPORT_PATH}"
     VERBATIM)
@@ -4246,7 +4246,7 @@ if(gRPC_INSTALL)
   )
 endif()
 
-if(gRPC_BUILD_TESTS) # 03.11.2022 adapted for KasperskyOS
+if(gRPC_BUILD_TESTS)
 
 add_executable(gen_hpack_tables
   tools/codegen/core/gen_hpack_tables.cc
@@ -7567,6 +7567,18 @@ if(_gRPC_PLATFORM_LINUX OR _gRPC_PLATFORM_POSIX)
     third_party/googletest/googletest/src/gtest-all.cc
     third_party/googletest/googlemock/src/gmock-all.cc
   )
+
+  if(KOS)
+    # KasperskyOS sys/types.h file contains definition of major and minor macroses.
+    # They must be undef for transport_security_common.pb.h file.
+    set(TRANSPORT_SECURITY_COMMON_GENERATED "${_gRPC_PROTO_GENS_DIR}/test/core/tsi/alts/fake_handshaker/transport_security_common.pb.h")
+    set(KOS_UNDEF "'/protoc_insertion_point(includes)/a#ifdef __KOS__\\n#undef major\\n#undef minor\\n#endif'") 
+    add_custom_target(undef_major_minor
+      DEPENDS "${TRANSPORT_SECURITY_COMMON_GENERATED}"
+      COMMAND sed -i "${KOS_UNDEF}" "${TRANSPORT_SECURITY_COMMON_GENERATED}"
+    )
+    add_dependencies(alts_concurrent_connectivity_test undef_major_minor)
+  endif()
 
   target_include_directories(alts_concurrent_connectivity_test
     PRIVATE
@@ -13544,8 +13556,7 @@ target_link_libraries(observable_test
 
 endif()
 if(gRPC_BUILD_TESTS)
-if(_gRPC_PLATFORM_LINUX OR _gRPC_PLATFORM_MAC OR _gRPC_PLATFORM_POSIX)
-
+  if(_gRPC_PLATFORM_LINUX OR _gRPC_PLATFORM_MAC OR _gRPC_PLATFORM_POSIX)
   add_executable(oracle_event_engine_posix_test
     test/core/event_engine/test_suite/client_test.cc
     test/core/event_engine/test_suite/event_engine_test.cc
@@ -17104,7 +17115,6 @@ endif()
 endif()
 if(gRPC_BUILD_TESTS)
 if(_gRPC_PLATFORM_LINUX OR _gRPC_PLATFORM_MAC OR _gRPC_PLATFORM_POSIX)
-
   add_executable(time_jump_test
     test/cpp/common/time_jump_test.cc
     third_party/googletest/googletest/src/gtest-all.cc
@@ -20331,11 +20341,11 @@ if(_gRPC_PLATFORM_LINUX OR _gRPC_PLATFORM_MAC OR _gRPC_PLATFORM_POSIX)
 endif()
 endif()
 
-
-
-
-
-
+if(gRPC_BUILD_TESTS AND KOS)
+  include(test/kos/cmake/tests.cmake)
+  get_target_property (TESTS_CXX buildtests_cxx MANUALLY_ADDED_DEPENDENCIES)
+  add_tests_kos("${TESTS_CXX}")
+endif()
 
 if(gRPC_INSTALL)
   install(EXPORT gRPCTargets

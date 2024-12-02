@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #include <grpc/support/port_platform.h>
@@ -140,12 +142,20 @@ void FinishCall(grpc_call* call, grpc_completion_queue* cq) {
   grpc_slice_unref(details);
 }
 
+#ifdef __KOS__
+const char* ServerAddr = "127.0.0.1";
+const char* IpVer = "ipv4:";
+#else
+const char* ServerAddr = "[::1]";
+const char* IpVer = "ipv6:";
+#endif
+
 class TestServer {
  public:
   explicit TestServer() {
     cq_ = grpc_completion_queue_create_for_next(nullptr);
     server_ = grpc_server_create(nullptr, nullptr);
-    address_ = grpc_core::JoinHostPort("[::1]", grpc_pick_unused_port_or_die());
+    address_ = grpc_core::JoinHostPort(ServerAddr, grpc_pick_unused_port_or_die());
     grpc_server_register_completion_queue(server_, cq_, nullptr);
     grpc_server_credentials* server_creds =
         grpc_insecure_server_credentials_create();
@@ -301,7 +311,7 @@ TEST(Pollers, TestDontCrashWhenTryingToReproIssueFixedBy23984) {
           grpc_channel_args_copy_and_add(nullptr, args.data(), args.size());
       grpc_channel_credentials* creds = grpc_insecure_credentials_create();
       grpc_channel* channel = grpc_channel_create(
-          std::string("ipv6:" + server_address).c_str(), creds, channel_args);
+      std::string(IpVer + server_address).c_str(), creds, channel_args);
       grpc_channel_credentials_release(creds);
       grpc_channel_args_destroy(channel_args);
       grpc_completion_queue* cq =

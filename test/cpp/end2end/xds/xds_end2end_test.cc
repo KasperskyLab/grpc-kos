@@ -20,6 +20,10 @@
 // xDS functionality in one file and then move specific features to
 // their own files (e.g., mTLS security, fault injection, circuit
 // breaking, etc).
+//
+// © 2024 AO Kaspersky Lab
+// Licensed under the Apache License, Version 2.0 (the "License")
+//
 
 #include <deque>
 #include <memory>
@@ -129,10 +133,15 @@ using ::grpc::experimental::ExternalCertificateVerifier;
 using ::grpc::experimental::IdentityKeyCertPair;
 using ::grpc::experimental::StaticDataCertificateProvider;
 
-constexpr char kClientCertPath[] = "src/core/tsi/test_creds/client.pem";
-constexpr char kClientKeyPath[] = "src/core/tsi/test_creds/client.key";
-constexpr char kBadClientCertPath[] = "src/core/tsi/test_creds/badclient.pem";
-constexpr char kBadClientKeyPath[] = "src/core/tsi/test_creds/badclient.key";
+#ifdef __KOS__
+#define TEST_FILES_ROOT "/kl_test_results/"
+#else
+#define TEST_FILES_ROOT
+#endif
+constexpr char kClientCertPath[] = TEST_FILES_ROOT"src/core/tsi/test_creds/client.pem";
+constexpr char kClientKeyPath[] = TEST_FILES_ROOT"src/core/tsi/test_creds/client.key";
+constexpr char kBadClientCertPath[] = TEST_FILES_ROOT"src/core/tsi/test_creds/badclient.pem";
+constexpr char kBadClientKeyPath[] = TEST_FILES_ROOT"src/core/tsi/test_creds/badclient.key";
 
 // Based on StaticDataCertificateProvider, but provides alternate certificates
 // if the certificate name is not empty.

@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #include <grpc/support/port_platform.h>
@@ -365,11 +367,17 @@ TEST(SliceTest, ExternalAsOwned) {
   Slice owned = slice.AsOwned();
   EXPECT_EQ(initial_sum, SumSlice(owned));
   external_string.reset();
+
+#ifndef __KOS__ // 23.12.2022 ASSERT_DEATH is not supported in KOS
+
   // In ASAN (where we can be sure that it'll crash), go ahead and read the
   // bytes we just deleted.
   if (BuiltUnderAsan()) {
     ASSERT_DEATH({ SumSlice(slice); }, "");
   }
+
+#endif
+
   EXPECT_EQ(initial_sum, SumSlice(owned));
 }
 

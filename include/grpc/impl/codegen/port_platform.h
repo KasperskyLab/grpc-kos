@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * © 2022 AO Kaspersky Lab. All Rights Reserved
- *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #ifndef GRPC_IMPL_CODEGEN_PORT_PLATFORM_H
@@ -384,7 +384,7 @@
 #else /* _LP64 */
 #define GPR_ARCH_32 1
 #endif /* _LP64 */
-#elif defined(__KOS__) // 03.11.2022 adapted for KasperskyOS
+#elif defined(__KOS__)
 #define GPR_PLATFORM_STRING "KasperskyOS"
 #ifndef _BSD_SOURCE
 #define _BSD_SOURCE

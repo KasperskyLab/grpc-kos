@@ -11,6 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// © 2024 AO Kaspersky Lab
+// Licensed under the Apache License, Version 2.0 (the "License")
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -42,7 +45,11 @@ namespace {
 const int kSslTsiTestRevokedKeyCertPairsNum = 1;
 const int kSslTsiTestValidKeyCertPairsNum = 1;
 const char* kSslTsiTestCrlSupportedCredentialsDir =
+#ifdef __KOS__
+    "/kl_test_results/test/core/tsi/test_creds/crl_data/";
+#else
     "test/core/tsi/test_creds/crl_data/";
+#endif
 const char* kSslTsiTestFaultyCrlsDir = "bad_path/";
 
 class CrlSslTransportSecurityTest

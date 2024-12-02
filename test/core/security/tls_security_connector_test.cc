@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #include "src/core/lib/security/security_connector/tls/tls_security_connector.h"
@@ -39,12 +41,21 @@
 #include "test/core/util/test_config.h"
 #include "test/core/util/tls_utils.h"
 
+#ifdef __KOS__
+#define CA_CERT_PATH "/kl_test_results/src/core/tsi/test_creds/ca.pem"
+#define CLIENT_CERT_PATH "/kl_test_results/src/core/tsi/test_creds/multi-domain.pem"
+#define SERVER_CERT_PATH_0 "/kl_test_results/src/core/tsi/test_creds/server0.pem"
+#define SERVER_KEY_PATH_0 "/kl_test_results/src/core/tsi/test_creds/server0.key"
+#define SERVER_CERT_PATH_1 "/kl_test_results/src/core/tsi/test_creds/server1.pem"
+#define SERVER_KEY_PATH_1 "/kl_test_results/src/core/tsi/test_creds/server1.key"
+#else
 #define CA_CERT_PATH "src/core/tsi/test_creds/ca.pem"
 #define CLIENT_CERT_PATH "src/core/tsi/test_creds/multi-domain.pem"
 #define SERVER_CERT_PATH_0 "src/core/tsi/test_creds/server0.pem"
 #define SERVER_KEY_PATH_0 "src/core/tsi/test_creds/server0.key"
 #define SERVER_CERT_PATH_1 "src/core/tsi/test_creds/server1.pem"
 #define SERVER_KEY_PATH_1 "src/core/tsi/test_creds/server1.key"
+#endif
 
 namespace grpc_core {
 namespace testing {

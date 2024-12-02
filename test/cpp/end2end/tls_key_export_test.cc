@@ -11,6 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// © 2024 AO Kaspersky Lab
+// Licensed under the Apache License, Version 2.0 (the "License")
 
 #include <memory>
 #include <string>
@@ -43,11 +46,19 @@ extern "C" {
 #define TLS_KEY_LOGGING_AVAILABLE
 #endif
 
+#ifdef __KOS__
+#define CA_CERT_PATH "/kl_test_results/src/core/tsi/test_creds/ca.pem"
+#define SERVER_KEY_PATH "/kl_test_results/src/core/tsi/test_creds/server0.key"
+#define SERVER_CERT_PATH "/kl_test_results/src/core/tsi/test_creds/server0.pem"
+#define CLIENT_KEY_PATH "/kl_test_results/src/core/tsi/test_creds/client.key"
+#define CLIENT_CERT_PATH "/kl_test_results/src/core/tsi/test_creds/client.pem"
+#else
 #define CA_CERT_PATH "src/core/tsi/test_creds/ca.pem"
 #define SERVER_KEY_PATH "src/core/tsi/test_creds/server0.key"
 #define SERVER_CERT_PATH "src/core/tsi/test_creds/server0.pem"
 #define CLIENT_KEY_PATH "src/core/tsi/test_creds/client.key"
 #define CLIENT_CERT_PATH "src/core/tsi/test_creds/client.pem"
+#endif
 
 #define NUM_REQUESTS_PER_CHANNEL 5
 

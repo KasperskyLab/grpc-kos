@@ -11,6 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// © 2024 AO Kaspersky Lab
+// Licensed under the Apache License, Version 2.0 (the "License")
 
 #include <grpc/support/port_platform.h>
 
@@ -25,12 +28,21 @@
 #include "test/core/util/test_config.h"
 #include "test/core/util/tls_utils.h"
 
+#ifdef __KOS__
+#define VALID_POLICY_PATH_1 \
+  "/kl_test_results/test/core/security/authorization/test_policies/valid_policy_1.json"
+#define VALID_POLICY_PATH_2 \
+  "/kl_test_results/test/core/security/authorization/test_policies/valid_policy_2.json"
+#define INVALID_POLICY_PATH \
+  "/kl_test_results/test/core/security/authorization/test_policies/invalid_policy.json"
+#else
 #define VALID_POLICY_PATH_1 \
   "test/core/security/authorization/test_policies/valid_policy_1.json"
 #define VALID_POLICY_PATH_2 \
   "test/core/security/authorization/test_policies/valid_policy_2.json"
 #define INVALID_POLICY_PATH \
   "test/core/security/authorization/test_policies/invalid_policy.json"
+#endif
 
 namespace grpc_core {
 

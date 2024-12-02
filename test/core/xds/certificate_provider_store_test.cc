@@ -14,7 +14,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-//
+// © 2024 AO Kaspersky Lab
+// Licensed under the Apache License, Version 2.0 (the "License")
 
 #include "src/core/ext/xds/certificate_provider_store.h"
 
@@ -154,9 +155,15 @@ TEST_F(CertificateProviderStoreTest, Multithreaded) {
                                                                  nullptr)}}};
   auto store = MakeOrphanable<CertificateProviderStore>(std::move(map));
   // Test concurrent `CreateOrGetCertificateProvider()` with the same key.
+#ifdef __KOS__
+  const size_t maxThreads = 500;
+#else
+  const size_t maxThreads = 1000;
+#endif
+
   std::vector<std::thread> threads;
-  threads.reserve(1000);
-  for (auto i = 0; i < 1000; i++) {
+  threads.reserve(maxThreads);
+  for (auto i = 0; i < maxThreads; i++) {
     threads.emplace_back([&store]() {
       for (auto i = 0; i < 10; ++i) {
         ASSERT_NE(store->CreateOrGetCertificateProvider("fake_plugin_1"),

@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+// © 2024 AO Kaspersky Lab
+// Licensed under the Apache License, Version 2.0 (the "License")
 
 #include <grpc/support/port_platform.h>
 
@@ -53,6 +55,16 @@ bool ErrorIsRetryable(int error) {
 #endif
 }
 
+#ifdef __KOS__
+//Only IPV4 supports
+int IPVer = AF_INET;
+const char* FakeServerAddr = "127.0.0.1";
+#else
+int IPVer = AF_INET6;
+const char* FakeServerAddr = "[::1]";
+#endif
+
+
 }  // namespace
 
 FakeUdpAndTcpServer::FakeUdpAndTcpServer(
@@ -61,13 +73,13 @@ FakeUdpAndTcpServer::FakeUdpAndTcpServer(
         process_read_cb)
     : accept_mode_(accept_mode), process_read_cb_(std::move(process_read_cb)) {
   port_ = grpc_pick_unused_port_or_die();
-  udp_socket_ = socket(AF_INET6, SOCK_DGRAM, 0);
+  udp_socket_ = socket(IPVer, SOCK_DGRAM, 0);
   if (udp_socket_ == BAD_SOCKET_RETURN_VAL) {
     gpr_log(GPR_ERROR, "Failed to create UDP ipv6 socket: %d", ERRNO);
     GPR_ASSERT(0);
   }
-  accept_socket_ = socket(AF_INET6, SOCK_STREAM, 0);
-  address_ = absl::StrCat("[::1]:", port_);
+  accept_socket_ = socket(IPVer, SOCK_STREAM, 0);
+  address_ = absl::StrCat(FakeServerAddr, ":", port_);
   if (accept_socket_ == BAD_SOCKET_RETURN_VAL) {
     gpr_log(GPR_ERROR, "Failed to create TCP IPv6 socket: %d", ERRNO);
     GPR_ASSERT(0);
@@ -111,11 +123,19 @@ FakeUdpAndTcpServer::FakeUdpAndTcpServer(
     GPR_ASSERT(0);
   }
 #endif
+#ifdef __KOS__
+  sockaddr_in addr;
+  memset(&addr, 0, sizeof(addr));
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(port_);
+  addr.sin_addr.s_addr = inet_addr(FakeServerAddr);
+#else
   sockaddr_in6 addr;
   memset(&addr, 0, sizeof(addr));
   addr.sin6_family = AF_INET6;
   addr.sin6_port = htons(port_);
   (reinterpret_cast<char*>(&addr.sin6_addr))[15] = 1;
+#endif
   grpc_resolved_address resolved_addr;
   memcpy(resolved_addr.addr, &addr, sizeof(addr));
   resolved_addr.len = sizeof(addr);

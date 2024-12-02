@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * © 2022 AO Kaspersky Lab. All Rights Reserved
- *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #include <grpc/support/port_platform.h>
@@ -28,7 +28,7 @@
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 
-#ifdef __KOS__ // 03.11.2022 adapted for KasperskyOS
+#ifdef __KOS__
 #include <sys/uio.h>
 #endif
 

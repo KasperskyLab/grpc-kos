@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+// © 2024 AO Kaspersky Lab
+// Licensed under the Apache License, Version 2.0 (the "License")
 
 #include "src/core/lib/security/credentials/tls/grpc_tls_certificate_provider.h"
 
@@ -32,12 +34,21 @@
 #include "test/core/util/test_config.h"
 #include "test/core/util/tls_utils.h"
 
+#ifdef __KOS__
+#define CA_CERT_PATH "/kl_test_results/src/core/tsi/test_creds/ca.pem"
+#define SERVER_CERT_PATH "/kl_test_results/src/core/tsi/test_creds/server1.pem"
+#define SERVER_KEY_PATH "/kl_test_results/src/core/tsi/test_creds/server1.key"
+#define CA_CERT_PATH_2 "/kl_test_results/src/core/tsi/test_creds/multi-domain.pem"
+#define SERVER_CERT_PATH_2 "/kl_test_results/src/core/tsi/test_creds/server0.pem"
+#define SERVER_KEY_PATH_2 "/kl_test_results/src/core/tsi/test_creds/server0.key"
+#else
 #define CA_CERT_PATH "src/core/tsi/test_creds/ca.pem"
 #define SERVER_CERT_PATH "src/core/tsi/test_creds/server1.pem"
 #define SERVER_KEY_PATH "src/core/tsi/test_creds/server1.key"
 #define CA_CERT_PATH_2 "src/core/tsi/test_creds/multi-domain.pem"
 #define SERVER_CERT_PATH_2 "src/core/tsi/test_creds/server0.pem"
 #define SERVER_KEY_PATH_2 "src/core/tsi/test_creds/server0.key"
+#endif
 #define INVALID_PATH "invalid/path"
 
 namespace grpc_core {

@@ -1,0 +1,86 @@
+/* © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Description of a solution security policy. */
+
+/* Assign the execute interface. */
+execute: kl.core.Execute
+
+/* Include the base.psl file containing a formal description
+ * of the Base security model. */
+use nk.base._
+
+/* Include EDL files. */
+use EDL Einit
+use EDL kl.core.Core
+use EDL kl.VfsSdCardFs
+use EDL kl.VfsNet
+use EDL helloworld.@MAIN_TASK@
+@INIT_EXTERNAL_ENTITIES@
+
+/* Allows the KasperskyOS kernel to start itself and the Einit class process. */
+execute src = kl.core.Core
+{
+    match dst = kl.core.Core              { grant () }
+    match dst = Einit                     { grant () }
+}
+
+/* An Einit class process is allowed
+ * to start any process in the solution. */
+execute src = Einit                       { grant () }
+
+/* A client of the Einit, helloworld.@MAIN_TASK@, and kl.bc.BlobContainer
+ * class processes is allowed to query the KasperskyOS kernel. */
+request dst = kl.core.Core
+{
+    match src = Einit                     { grant () }
+    match src = helloworld.@MAIN_TASK@    { grant () }
+    match src = kl.bc.BlobContainer       { grant () }
+}
+
+/* Any client in the solution is allowed to query
+ * a server of the kl.bc.BlobContainer class. */
+request dst = kl.bc.BlobContainer         { grant () }
+
+/* A client of the kl.bc.BlobContainer class is allowed to query
+ * a server of the kl.VfsSdCardFs class. */
+request src = kl.bc.BlobContainer
+{
+    match dst = kl.VfsSdCardFs            { grant () }
+}
+
+/* A client of the kl.rump.Dhcpcd class is allowed to query a server
+ * of the kl.VfsNet and kl.VfsSdCardFs classes. */
+request src = kl.rump.Dhcpcd
+{
+    match dst = kl.VfsSdCardFs            { grant () }
+    match dst = kl.VfsNet                 { grant () }
+}
+
+/* A client of the helloworld.@MAIN_TASK@ class is allowed to query a server
+ * of the kl.VfsNet and kl.VfsSdCardFs classes. */
+request src = helloworld.@MAIN_TASK@
+{
+    match dst = kl.VfsSdCardFs            { grant () }
+    match dst = kl.VfsNet                 { grant () }
+}
+
+/* Any server and the KasperskyOS kernel are allowed to respond to
+ * queries of any client. */
+response                                  { grant () }
+
+/* Any server and the KasperskyOS kernel are allowed to notify
+ * any client regarding errors that occur when the client queries
+ * the server or the KasperskyOS kernel by calling any method. */
+error                                     { grant () }
