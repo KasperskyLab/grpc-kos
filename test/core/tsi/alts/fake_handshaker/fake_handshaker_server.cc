@@ -14,12 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
+
 #include "test/core/tsi/alts/fake_handshaker/fake_handshaker_server.h"
 
 #include <memory>
 #include <sstream>
 #include <string>
+#ifdef __KOS__
+#include <cstdint>
+#endif
 
 #include <grpc/grpc.h>
 #include <grpc/support/log.h>

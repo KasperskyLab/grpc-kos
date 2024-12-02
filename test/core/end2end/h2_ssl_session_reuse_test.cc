@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #include <stdio.h>
@@ -36,11 +38,19 @@
 #include "test/core/util/port.h"
 #include "test/core/util/test_config.h"
 
+#ifdef __KOS__
+#define CA_CERT_PATH "/kl_test_results/src/core/tsi/test_creds/ca.pem"
+#define CLIENT_CERT_PATH "/kl_test_results/src/core/tsi/test_creds/client.pem"
+#define CLIENT_KEY_PATH "/kl_test_results/src/core/tsi/test_creds/client.key"
+#define SERVER_CERT_PATH "/kl_test_results/src/core/tsi/test_creds/server1.pem"
+#define SERVER_KEY_PATH "/kl_test_results/src/core/tsi/test_creds/server1.key"
+#else
 #define CA_CERT_PATH "src/core/tsi/test_creds/ca.pem"
 #define CLIENT_CERT_PATH "src/core/tsi/test_creds/client.pem"
 #define CLIENT_KEY_PATH "src/core/tsi/test_creds/client.key"
 #define SERVER_CERT_PATH "src/core/tsi/test_creds/server1.pem"
 #define SERVER_KEY_PATH "src/core/tsi/test_creds/server1.key"
+#endif
 
 namespace grpc {
 namespace testing {

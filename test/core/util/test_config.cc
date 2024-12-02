@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #include "test/core/util/test_config.h"
@@ -55,6 +57,10 @@ static unsigned seed(void) { return static_cast<unsigned>(getpid()); }
 #if GPR_GETPID_IN_PROCESS_H
 #include <process.h>
 static unsigned seed(void) { return (unsigned)_getpid(); }
+#endif
+
+#ifdef __KOS__
+#include <kos_net.h>
 #endif
 
 int64_t grpc_test_sanitizer_slowdown_factor() {
@@ -146,6 +152,12 @@ void grpc_test_init(int* argc, char** argv) {
   /* seed rng with pid, so we don't end up with the same random numbers as a
      concurrently running test binary */
   srand(seed());
+
+#ifdef __KOS__
+  if (!wait_for_network()) {
+    gpr_log(GPR_ERROR, "[KasperskyOS] Network up failed");
+  }
+#endif
 }
 
 bool grpc_wait_until_shutdown(int64_t time_s) {

@@ -14,9 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
+#ifndef __KOS__
 #include <spawn.h>
+#endif
 
 #include <sstream>
 #include <string>
@@ -40,8 +44,8 @@
 
 extern char** environ;
 
-#ifdef GPR_ANDROID
-// Android doesn't have posix_spawn. Use std::system instead
+#if defined(GPR_ANDROID) || defined(GPR_KOS)
+// Android and KasperskyOS don't have posix_spawn. Use std::system instead
 void run_cmd(const char* cmd) { std::system(cmd); }
 #else
 void run_cmd(const char* cmd) {

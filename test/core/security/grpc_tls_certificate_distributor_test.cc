@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+// © 2024 AO Kaspersky Lab
+// Licensed under the Apache License, Version 2.0 (the "License")
 
 #include "src/core/lib/security/credentials/tls/grpc_tls_certificate_distributor.h"
 
@@ -32,6 +34,11 @@
 #include "test/core/util/test_config.h"
 #include "test/core/util/tls_utils.h"
 
+#ifdef __KOS__
+  const size_t maxThreads = 500;
+#else
+  const size_t maxThreads = 1000;
+#endif
 namespace grpc_core {
 
 namespace testing {
@@ -574,12 +581,12 @@ TEST_F(GrpcTlsCertificateDistributorTest, SetKeyMaterialsInCallback) {
                                                  kIdentityCert1Contents))));
     CancelWatch(watcher_state_1);
   };
-  // Start 1000 threads that will register a watcher to a new cert name, verify
+  // Start maxThreads threads that will register a watcher to a new cert name, verify
   // the key materials being set, and then cancel the watcher, to make sure the
   // lock mechanism in the distributor is safe.
   std::vector<std::thread> threads;
-  threads.reserve(1000);
-  for (int i = 0; i < 1000; ++i) {
+  threads.reserve(maxThreads);
+  for (int i = 0; i < maxThreads; ++i) {
     threads.emplace_back(verify_function, std::to_string(i));
   }
   for (auto& th : threads) {
@@ -923,12 +930,12 @@ TEST_F(GrpcTlsCertificateDistributorTest, SetErrorForCertInCallback) {
                     ErrorInfo(kRootErrorMessage, kIdentityErrorMessage)));
     CancelWatch(watcher_state_1);
   };
-  // Start 1000 threads that will register a watcher to a new cert name, verify
+  // Start maxThreads threads that will register a watcher to a new cert name, verify
   // the key materials being set, and then cancel the watcher, to make sure the
   // lock mechanism in the distributor is safe.
   std::vector<std::thread> threads;
-  threads.reserve(1000);
-  for (int i = 0; i < 1000; ++i) {
+  threads.reserve(maxThreads);
+  for (int i = 0; i < maxThreads; ++i) {
     threads.emplace_back(verify_function, std::to_string(i));
   }
   for (auto& th : threads) {

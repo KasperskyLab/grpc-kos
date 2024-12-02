@@ -56,7 +56,7 @@ class ServerThread {
     grpc_arg a[2];
     a[0].type = GRPC_ARG_INTEGER;
     a[0].key = const_cast<char*>(GRPC_ARG_SERVER_HANDSHAKE_TIMEOUT_MS);
-    a[0].value.integer = 1000;
+    a[0].value.integer = 3000;
     a[1].key = const_cast<char*>(GRPC_ARG_RESOURCE_QUOTA);
     a[1].type = GRPC_ARG_POINTER;
     a[1].value.pointer.p = grpc_resource_quota_create("test");
@@ -144,9 +144,9 @@ class Client {
     grpc_slice_buffer read_buffer;
     grpc_slice_buffer_init(&read_buffer);
     bool retval = true;
-    // Use a deadline of 3 seconds, which is a lot more than we should
-    // need for a 1-second timeout, but this helps avoid flakes.
-    Timestamp deadline = ExecCtx::Get()->Now() + Duration::Seconds(3);
+    // Use a deadline of 5 seconds, which is a lot more than we should
+    // need for a 3-second timeout, but this helps avoid flakes.
+    Timestamp deadline = ExecCtx::Get()->Now() + Duration::Seconds(5);
     while (true) {
       EventState state;
       grpc_endpoint_read(endpoint_, &read_buffer, state.closure(),

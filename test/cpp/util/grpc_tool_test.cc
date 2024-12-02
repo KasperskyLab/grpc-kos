@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #include "test/cpp/util/grpc_tool.h"
@@ -46,9 +48,15 @@
 #include "test/cpp/util/string_ref_helper.h"
 #include "test/cpp/util/test_config.h"
 
+#if __KOS__
+#define CA_CERT_PATH "/kl_test_results/src/core/tsi/test_creds/ca.pem"
+#define SERVER_CERT_PATH "/kl_test_results/src/core/tsi/test_creds/server1.pem"
+#define SERVER_KEY_PATH "/kl_test_results/src/core/tsi/test_creds/server1.key"
+#else
 #define CA_CERT_PATH "src/core/tsi/test_creds/ca.pem"
 #define SERVER_CERT_PATH "src/core/tsi/test_creds/server1.pem"
 #define SERVER_KEY_PATH "src/core/tsi/test_creds/server1.key"
+#endif
 
 using grpc::testing::EchoRequest;
 using grpc::testing::EchoResponse;
@@ -332,6 +340,13 @@ class GrpcToolTest : public ::testing::Test {
 };
 
 TEST_F(GrpcToolTest, NoCommand) {
+
+#ifdef __KOS__
+
+  GTEST_SKIP() << "Death Tests are not supported in KasperskyOS";
+
+#else
+
   // Test input "grpc_cli"
   std::stringstream output_stream;
   const char* argv[] = {"grpc_cli"};
@@ -343,9 +358,18 @@ TEST_F(GrpcToolTest, NoCommand) {
       ::testing::ExitedWithCode(1), "No command specified\n" USAGE_REGEX);
   // No output
   EXPECT_TRUE(0 == output_stream.tellp());
+
+#endif //__KOS__
 }
 
 TEST_F(GrpcToolTest, InvalidCommand) {
+
+#ifdef __KOS__
+
+  GTEST_SKIP() << "Death Tests are not supported in KasperskyOS";
+
+#else
+
   // Test input "grpc_cli"
   std::stringstream output_stream;
   const char* argv[] = {"grpc_cli", "abc"};
@@ -357,9 +381,18 @@ TEST_F(GrpcToolTest, InvalidCommand) {
       ::testing::ExitedWithCode(1), "Invalid command 'abc'\n" USAGE_REGEX);
   // No output
   EXPECT_TRUE(0 == output_stream.tellp());
+
+#endif //__KOS__
 }
 
 TEST_F(GrpcToolTest, HelpCommand) {
+
+#ifdef __KOS__
+
+  GTEST_SKIP() << "Death Tests are not supported in KasperskyOS";
+
+#else
+
   // Test input "grpc_cli help"
   std::stringstream output_stream;
   const char* argv[] = {"grpc_cli", "help"};
@@ -370,6 +403,8 @@ TEST_F(GrpcToolTest, HelpCommand) {
               ::testing::ExitedWithCode(1), USAGE_REGEX);
   // No output
   EXPECT_TRUE(0 == output_stream.tellp());
+
+#endif //__KOS__
 }
 
 TEST_F(GrpcToolTest, ListCommand) {
@@ -1182,6 +1217,13 @@ TEST_F(GrpcToolTest, ParseCommandJsonFormat) {
 }
 
 TEST_F(GrpcToolTest, TooFewArguments) {
+
+#ifdef __KOS__
+
+  GTEST_SKIP() << "Death Tests are not supported in KasperskyOS";
+
+#else
+
   // Test input "grpc_cli call Echo"
   std::stringstream output_stream;
   const char* argv[] = {"grpc_cli", "call", "Echo"};
@@ -1194,9 +1236,18 @@ TEST_F(GrpcToolTest, TooFewArguments) {
       ::testing::ExitedWithCode(1), ".*Wrong number of arguments for call.*");
   // No output
   EXPECT_TRUE(0 == output_stream.tellp());
+
+#endif // __KOS__
 }
 
 TEST_F(GrpcToolTest, TooManyArguments) {
+
+#ifdef __KOS__
+
+  GTEST_SKIP() << "Death Tests are not supported in KasperskyOS";
+
+#else
+
   // Test input "grpc_cli call localhost:<port> Echo Echo "message: 'Hello'"
   std::stringstream output_stream;
   const char* argv[] = {"grpc_cli", "call", "localhost:10000",
@@ -1210,6 +1261,8 @@ TEST_F(GrpcToolTest, TooManyArguments) {
       ::testing::ExitedWithCode(1), ".*Wrong number of arguments for call.*");
   // No output
   EXPECT_TRUE(0 == output_stream.tellp());
+
+#endif // __KOS__
 }
 
 TEST_F(GrpcToolTest, CallCommandWithMetadata) {
@@ -1259,6 +1312,13 @@ TEST_F(GrpcToolTest, CallCommandWithMetadata) {
 }
 
 TEST_F(GrpcToolTest, CallCommandWithBadMetadata) {
+
+#ifdef __KOS__
+
+  GTEST_SKIP() << "Death Tests are not supported in KasperskyOS";
+
+#else
+
   // Test input "grpc_cli call localhost:10000 Echo "message: 'Hello'"
   const char* argv[] = {"grpc_cli", "call", "localhost:10000",
                         "grpc.testing.EchoTestService.Echo",
@@ -1296,6 +1356,8 @@ TEST_F(GrpcToolTest, CallCommandWithBadMetadata) {
   absl::SetFlag(&FLAGS_protofiles, "");
 
   gpr_free(test_srcdir);
+
+#endif // __KOS__
 }
 
 TEST_F(GrpcToolTest, ListCommand_OverrideSslHostName) {

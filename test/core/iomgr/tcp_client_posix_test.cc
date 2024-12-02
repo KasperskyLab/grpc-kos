@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #include "src/core/lib/gprpp/time.h"
@@ -250,7 +252,12 @@ void test_fails_bad_addr_no_leak(void) {
   memset(&resolved_addr, 0, sizeof(resolved_addr));
   resolved_addr.len = static_cast<socklen_t>(sizeof(struct sockaddr_in));
   // force `grpc_tcp_client_prepare_fd` to fail. contrived, but effective.
+#ifdef __KOS__ // AF_IPX is not defined in KOS.
+  addr->sin_family = AF_UNSPEC;
+#else
   addr->sin_family = AF_IPX;
+#endif
+
   gpr_mu_lock(g_mu);
   connections_complete_before = g_connections_complete;
   gpr_mu_unlock(g_mu);

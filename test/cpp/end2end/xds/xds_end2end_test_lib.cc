@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+// © 2024 AO Kaspersky Lab
+// Licensed under the Apache License, Version 2.0 (the "License")
+//
 
 #include "test/cpp/end2end/xds/xds_end2end_test_lib.h"
 
@@ -452,11 +455,17 @@ const char XdsEnd2endTest::kDefaultEdsServiceName[] = "eds_service_name";
 const char XdsEnd2endTest::kDefaultServerRouteConfigurationName[] =
     "default_server_route_config_name";
 
-const char XdsEnd2endTest::kCaCertPath[] = "src/core/tsi/test_creds/ca.pem";
+#ifdef __KOS__
+#define TEST_FILES_ROOT "/kl_test_results/"
+#else
+#define TEST_FILES_ROOT
+#endif
+
+const char XdsEnd2endTest::kCaCertPath[] = TEST_FILES_ROOT"src/core/tsi/test_creds/ca.pem";
 const char XdsEnd2endTest::kServerCertPath[] =
-    "src/core/tsi/test_creds/server1.pem";
+    TEST_FILES_ROOT"src/core/tsi/test_creds/server1.pem";
 const char XdsEnd2endTest::kServerKeyPath[] =
-    "src/core/tsi/test_creds/server1.key";
+    TEST_FILES_ROOT"src/core/tsi/test_creds/server1.key";
 
 const char XdsEnd2endTest::kRequestMessage[] = "Live long and prosper.";
 

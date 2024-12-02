@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #include <thread>
@@ -41,7 +43,11 @@ TEST(ServerRequestCallTest, ShortDeadlineDoesNotCauseOkayFalse) {
   // grpc server config.
   std::ostringstream s;
   int p = grpc_pick_unused_port_or_die();
+#ifdef __KOS__
+  s << "127.0.0.1:" << p;
+#else
   s << "[::1]:" << p;
+#endif
   const string address = s.str();
   testing::EchoTestService::AsyncService service;
   ServerBuilder builder;

@@ -8,6 +8,7 @@
 [submodule "third_party/protobuf"]
 	path = third_party/protobuf
 	url = https://github.com/KasperskyLab/protobuf-kos.git
+	branch = main
 [submodule "third_party/googletest"]
 	path = third_party/googletest
 	url = https://github.com/google/googletest.git
@@ -23,6 +24,7 @@
 [submodule "third_party/cares/cares"]
 	path = third_party/cares/cares
 	url = https://github.com/KasperskyLab/c-ares-kos.git
+	branch = main
 [submodule "third_party/bloaty"]
 	path = third_party/bloaty
 	url = https://github.com/google/bloaty.git

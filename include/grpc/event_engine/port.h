@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// © 2022 AO Kaspersky Lab. All Rights Reserved
-//
+// © 2024 AO Kaspersky Lab
+// Licensed under the Apache License, Version 2.0 (the "License")
+
 #ifndef GRPC_EVENT_ENGINE_PORT_H
 #define GRPC_EVENT_ENGINE_PORT_H
 
@@ -24,7 +25,7 @@
     defined(GPR_FREEBSD) || defined(GPR_OPENBSD) || defined(GPR_SOLARIS) || \
     defined(GPR_AIX) || defined(GPR_NACL) || defined(GPR_FUCHSIA) ||        \
     defined(GRPC_POSIX_SOCKET) || defined(GPR_NETBSD) || \
-    defined(GPR_KOS) // 03.11.2022 adapted for KasperskyOS
+    defined(GPR_KOS)
 #define GRPC_EVENT_ENGINE_POSIX
 #include <arpa/inet.h>
 #include <netdb.h>

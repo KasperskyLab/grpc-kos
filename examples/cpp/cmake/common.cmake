@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# © 2024 AO Kaspersky Lab
+# Licensed under the Apache License, Version 2.0 (the "License")
+#
 # cmake build file for C++ route_guide example.
 # Assumes protobuf and gRPC have been installed using cmake.
 # See cmake_externalproject/CMakeLists.txt for all-in-one cmake build
@@ -97,7 +100,9 @@ else()
 
   # Find Protobuf installation
   # Looks for protobuf-config.cmake file installed by Protobuf's cmake installation.
-  set(protobuf_MODULE_COMPATIBLE TRUE)
+  if(NOT KOS)
+    set(protobuf_MODULE_COMPATIBLE TRUE)
+  endif()
   find_package(Protobuf CONFIG REQUIRED)
   message(STATUS "Using protobuf ${Protobuf_VERSION}")
 

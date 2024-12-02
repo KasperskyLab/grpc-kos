@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# © 2024 AO Kaspersky Lab
+# Licensed under the Apache License, Version 2.0 (the "License")
 
 if(gRPC_PROTOBUF_PROVIDER STREQUAL "module")
   # Building the protobuf tests require gmock what is not part of a standard protobuf checkout.
@@ -37,13 +40,10 @@ if(gRPC_PROTOBUF_PROVIDER STREQUAL "module")
     if(TARGET libprotoc)
       set(_gRPC_PROTOBUF_PROTOC_LIBRARIES libprotoc)
     endif()
-    if(TARGET protoc)
-      set(_gRPC_PROTOBUF_PROTOC protoc)
-      if(CMAKE_CROSSCOMPILING)
-        find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)
-      else()
-        set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protoc>)
-      endif()
+    if(TARGET protoc AND NOT CMAKE_CROSSCOMPILING)
+      set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protoc>)
+    else()
+      find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)
     endif()
     # For well-known .proto files distributed with protobuf
     set(_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR "${PROTOBUF_ROOT_DIR}/src")

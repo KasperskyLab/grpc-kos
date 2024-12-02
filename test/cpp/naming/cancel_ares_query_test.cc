@@ -297,7 +297,7 @@ void TestCancelDuringActiveQuery(
     expected_status_code = GRPC_STATUS_DEADLINE_EXCEEDED;
     // use default DNS resolution timeout (which is over one minute).
     client_args = nullptr;
-    rpc_deadline = grpc_timeout_milliseconds_to_deadline(100);
+    rpc_deadline = grpc_timeout_milliseconds_to_deadline(25);
   } else if (query_timeout_setting == SHORT) {
     // The DNS resolution timeout should fire well before the
     // RPC's deadline expires.

@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #include <grpc/support/port_platform.h>
@@ -124,11 +126,19 @@ enum class CredentialsType {
   kMtls = 2,
 };
 
+#ifdef __KOS__
+constexpr char kCaCertPath[] = "/kl_test_results/src/core/tsi/test_creds/ca.pem";
+constexpr char kServerCertPath[] = "/kl_test_results/src/core/tsi/test_creds/server1.pem";
+constexpr char kServerKeyPath[] = "/kl_test_results/src/core/tsi/test_creds/server1.key";
+constexpr char kClientCertPath[] = "/kl_test_results/src/core/tsi/test_creds/client.pem";
+constexpr char kClientKeyPath[] = "/kl_test_results/src/core/tsi/test_creds/client.key";
+#else
 constexpr char kCaCertPath[] = "src/core/tsi/test_creds/ca.pem";
 constexpr char kServerCertPath[] = "src/core/tsi/test_creds/server1.pem";
 constexpr char kServerKeyPath[] = "src/core/tsi/test_creds/server1.key";
 constexpr char kClientCertPath[] = "src/core/tsi/test_creds/client.pem";
 constexpr char kClientKeyPath[] = "src/core/tsi/test_creds/client.key";
+#endif
 
 std::string ReadFile(const char* file_path) {
   grpc_slice slice;

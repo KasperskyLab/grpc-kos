@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2024 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #include "src/core/lib/iomgr/resolve_address.h"
@@ -276,6 +278,11 @@ TEST_F(ResolveAddressTest, MissingDefaultPort) {
 }
 
 TEST_F(ResolveAddressTest, IPv6WithPort) {
+#ifdef __KOS__
+  if (std::string(g_resolver_type) != "ares") {
+    GTEST_SKIP() << "this test is only valid on KasperskyOS with the c-ares resolver";
+  }
+#endif
   grpc_core::ExecCtx exec_ctx;
   grpc_core::GetDNSResolver()->ResolveName(
       "[2001:db8::1]:1", "", pollset_set(),
@@ -294,14 +301,29 @@ void TestIPv6WithoutPort(ResolveAddressTest* test, const char* target) {
 }
 
 TEST_F(ResolveAddressTest, IPv6WithoutPortNoBrackets) {
+#ifdef __KOS__
+  if (std::string(g_resolver_type) != "ares") {
+    GTEST_SKIP() << "this test is only valid on KasperskyOS with the c-ares resolver";
+  }
+#endif
   TestIPv6WithoutPort(this, "2001:db8::1");
 }
 
 TEST_F(ResolveAddressTest, IPv6WithoutPortWithBrackets) {
+#ifdef __KOS__
+  if (std::string(g_resolver_type) != "ares") {
+    GTEST_SKIP() << "this test is only valid on KasperskyOS with the c-ares resolver";
+  }
+#endif
   TestIPv6WithoutPort(this, "[2001:db8::1]");
 }
 
 TEST_F(ResolveAddressTest, IPv6WithoutPortV4MappedV6) {
+#ifdef __KOS__
+  if (std::string(g_resolver_type) != "ares") {
+    GTEST_SKIP() << "this test is only valid on KasperskyOS with the c-ares resolver";
+  }
+#endif
   TestIPv6WithoutPort(this, "2001:db8::1.2.3.4");
 }
 
@@ -392,8 +414,13 @@ void InjectNonResponsiveDNSServer(ares_channel channel) {
   // list.
   struct ares_addr_port_node dns_server_addrs[1];
   memset(dns_server_addrs, 0, sizeof(dns_server_addrs));
+#ifdef __KOS__
+  dns_server_addrs[0].family = AF_INET;
+  dns_server_addrs[0].addr.addr4.s_addr = inet_addr("127.0.0.1"); 
+#else
   dns_server_addrs[0].family = AF_INET6;
   (reinterpret_cast<char*>(&dns_server_addrs[0].addr.addr6))[15] = 0x1;
+#endif
   dns_server_addrs[0].tcp_port = g_fake_non_responsive_dns_server_port;
   dns_server_addrs[0].udp_port = g_fake_non_responsive_dns_server_port;
   dns_server_addrs[0].next = nullptr;
