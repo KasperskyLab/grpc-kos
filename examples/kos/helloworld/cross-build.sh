@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# © 2024 AO Kaspersky Lab
+# © 2025 AO Kaspersky Lab
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -51,10 +51,8 @@ OPTIONS:
         'qemu' to build a KasperskyOS-based solution image named 'kos-qemu-image' that includes the KasperskyOS server/client
             and to run this solution on QEMU.
         'image' to build a KasperskyOS-based solution image named 'kos-image' that includes the KasperskyOS server/client.
-            Prepare a bootable SD card and write 'kos-image' on it to run example on Raspberry Pi 4 B.
-        'rpi' to build a file system image named 'rpi4kos.img' for a bootable SD card. The following is loaded into the file system image:
-            'kos-image', U-Boot bootloader that starts the example, and the firmware for Raspberry Pi 4 B.
-            Write the 'rpi4kos.img' image to the SD card with dd utility to run example on Raspberry Pi 4 B.
+            Prepare a bootable SD card and write 'kos-image' on it to run example on hardware platform.
+        'sdimage' to create a file system image for a bootable device for hardware.
         Default value: qemu.
 
     -K, --kos-install PATH
@@ -84,9 +82,9 @@ while [ -n "${1}" ]; do
         shift;;
     -p | --platform)
         case "${2}" in
-            qemu)  CMAKE_TARGET=sim ;;
-            image) CMAKE_TARGET=kos-image ;;
-            rpi)   CMAKE_TARGET=sd-image ;;
+            qemu)    CMAKE_TARGET=sim ;;
+            image)   CMAKE_TARGET=kos-image ;;
+            sdimage) CMAKE_TARGET=sd-image ;;
             *) echo "Invalid platform: ${2}."; PrintHelp; exit 1;;
         esac
         shift;;
@@ -150,7 +148,6 @@ fi
 BUILD="${BUILD}/${TARGET}"
 
 cmake -B "${BUILD}" -G "Unix Makefiles" \
-      -D BOARD:STRING="RPI4_BCM2711" \
       -D BUILD_TARGET:STRING="${TARGET}" \
       -D GRPC_ROOT_DIR:STRING="${ROOT_DIR}" \
       -D USE_SECURE_CONNECTION:BOOL=$USE_SECURE_CONNECTION_VALUE \

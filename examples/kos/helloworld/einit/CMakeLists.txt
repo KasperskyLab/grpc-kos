@@ -1,4 +1,4 @@
-# © 2024 AO Kaspersky Lab
+# © 2025 AO Kaspersky Lab
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,7 +18,7 @@ include(platform/image)
 include(${KL_SDK_ROOT_PATH}/common/build-sd-image.cmake)
 
 # Set the linker and compiler flags.
-project_header_default("STANDARD_GNU_11:YES" "STRICT_WARNINGS:NO")
+project_header_default("STANDARD_GNU_17:YES" "STRICT_WARNINGS:NO")
 
 # Choose secure (ON) or insecure (OFF) connection for gRPC server.
 option(USE_SECURE_CONNECTION "Use secure connection for gRPC")
@@ -27,7 +27,6 @@ set(SECURITY_PSL_FILE "src/security.psl.in")
 set(CONNECTIONS_CFG_FILE "src/${BUILD_TARGET}.init.yaml.in")
 set(IMAGE_FS "${CMAKE_BINARY_DIR}/hdd")
 set(LIBS_PATH "${IMAGE_FS}/lib")
-set(RPI4_DISK_IMAGE "${CMAKE_BINARY_DIR}/rpi4kos.img")
 set(QEMU_DISK_IMAGE sdcard0.img)
 set(QEMU_DEPENDENCIES ${QEMU_DISK_IMAGE})
 set(QEMU_FLAGS "-drive file=${QEMU_DISK_IMAGE},if=sd,format=raw")
@@ -38,6 +37,7 @@ endif()
 # Define the ENTITIES variable with a list of program.
 set(ENTITIES
   ${MAIN_TASK}
+  ${NTPD}
   ${precompiled_vfsVfsSdCardFs}
   ${precompiled_vfsVfsNet}
   ${rump_DHCPCD_ENTITY}
@@ -77,7 +77,7 @@ set_target_properties(${precompiled_vfsVfsSdCardFs}
 if(USE_SECURE_CONNECTION)
   set_target_properties(${MAIN_TASK}
     PROPERTIES
-      EXTRA_ARGS "- --secure"
+      EXTRA_ARGS "    - --secure"
   )
 endif()
 
@@ -103,27 +103,6 @@ add_custom_target(${QEMU_DISK_IMAGE}
           -d ${IMAGE_FS} -s 128 -f fat32 -img ${QEMU_DISK_IMAGE}
 )
 
-# Create a top-level CMake target named kos-image which can be used
-# when building a solution image to be started on the hardware platform.
-build_kos_hw_image(kos-image
-  EINIT_ENTITY EinitHw
-  CONNECTIONS_CFG "${CONNECTIONS_CFG_FILE}"
-  SECURITY_PSL "${SECURITY_PSL_FILE}"
-  PACK_DEPS_COPY_ONLY ON
-  PACK_DEPS_LIBS_PATH ${LIBS_PATH}
-  PACK_DEPS_COPY_TARGET copylibs_hw
-  IMAGE_FILES ${ENTITIES}
-)
-
-add_dependencies(kos-image copylibs_hw)
-
-# Create a top-level CMake target named sd-image which can be used
-# when building an SD card image to be started on the hardware platform.
-build_sd_image(sd-image
-  KOS_IMAGE_TARGET kos-image
-  IMAGE_FS ${IMAGE_FS}
-)
-
 # Create a top-level CMake target named kos-qemu-image which can be used
 # when building a solution image to be started in QEMU.
 build_kos_qemu_image(kos-qemu-image
@@ -137,4 +116,36 @@ build_kos_qemu_image(kos-qemu-image
   PACK_DEPS_LIBS_PATH ${LIBS_PATH}
   PACK_DEPS_COPY_TARGET copylibs_qemu
   IMAGE_FILES ${ENTITIES}
+)
+
+if(BOARD STREQUAL "RADXA_ROCK_3A")
+  # Radxa Rock 3a uses mmc1 instead default mmc0 for VfsSdCardFs.
+  # Change ROOTFS only for hardware -- before build_kos_hw_image. QEMU uses mmc0.
+  set_target_properties (${precompiled_vfsVfsSdCardFs}
+  PROPERTIES
+      EXTRA_ENV "\
+        ROOTFS: mmc1,0 / fat32 0
+        VFS_FILESYSTEM_BACKEND: server:kl.VfsSdCardFs"
+  )
+endif()
+
+# Create a top-level CMake target named kos-image which can be used
+# when building a solution image to be started on the hardware platform.
+build_kos_hw_image(kos-image
+  EINIT_ENTITY EinitHw
+  CONNECTIONS_CFG "${CONNECTIONS_CFG_FILE}"
+  SECURITY_PSL "${SECURITY_PSL_FILE}"
+  PACK_DEPS_COPY_ONLY ON
+  PACK_DEPS_LIBS_PATH ${LIBS_PATH}
+  PACK_DEPS_COPY_TARGET copylibs_hw
+  IMAGE_FILES ${ENTITIES}
+)
+
+add_dependencies(kos-image copylibs_hw disk_image_fs)
+
+# Create a top-level CMake target named sd-image which can be used
+# when building an SD card image to be started on the hardware platform.
+build_sd_image(sd-image
+  KOS_IMAGE_TARGET kos-image
+  IMAGE_FS ${IMAGE_FS}
 )

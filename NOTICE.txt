@@ -1,6 +1,6 @@
-Kaspersky OS modification of gRPC
+KasperskyOS modification of gRPC
 
-Kaspersky OS modification of gRPC is an adapted version of the gRPC project for use on Kaspersky OS.
+KasperskyOS modification of gRPC is an adapted version of the gRPC project for use on KasperskyOS.
 
 This software contains code derived from the gRPC project.
 

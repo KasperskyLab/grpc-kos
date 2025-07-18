@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * © 2024 AO Kaspersky Lab
+ * © 2025 AO Kaspersky Lab
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
@@ -32,6 +32,8 @@
 #include <iostream>
 #include <thread>
 #include <string>
+
+using namespace std::chrono_literals;
 
 using grpc::Channel;
 
@@ -100,7 +102,7 @@ int main(int argc, char** argv)
             {
                 continue;
             }
-            
+
             if(CommandLineArg::TryParse(arg_target, argv[i], targetEndpoint))
             {
                 continue;
@@ -118,15 +120,14 @@ int main(int argc, char** argv)
             std::cout << AppNameTag << "Error: Wait for network failed!" << std::endl;
             return EXIT_FAILURE;
         }
+        // wait for ARP DAD to be done 
+        std::this_thread::sleep_for(5s);
 #endif
-
-        //LogMessage() << "target: " << targetEndpoint;
         std::cout << AppNameTag << "target: " << targetEndpoint << std::endl;
         std::cout << AppNameTag << "using secure connection: " <<
             std::boolalpha << useSecureConnection << std::endl;
 
         auto channel = CreateChannel(targetEndpoint, useSecureConnection);
-    
         GreeterClient greeter(channel);
 
 #ifdef __KOS__
@@ -152,5 +153,5 @@ int main(int argc, char** argv)
     {
         std::cout << AppNameTag << "Error: " <<  e.what() << std::endl;
         return EXIT_FAILURE;
-    } 
+    }
 }

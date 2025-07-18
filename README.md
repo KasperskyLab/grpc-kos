@@ -9,7 +9,7 @@ This project is an adaptation of gRPC for KasperskyOS. It is based on the origin
 use in KasperskyOS.
 
 For additional details on KasperskyOS, including its limitations and known issues, please refer to the
-[KasperskyOS Community Edition Online Help](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.2&customization=KCE_community_edition).
+[KasperskyOS Community Edition Online Help](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=community_edition).
 
 ## Table of contents
 - [KasperskyOS modification of gRPC](#kasperskyos-modification-of-grpc)
@@ -47,11 +47,6 @@ These libraries enable communication between clients and servers using any combi
 This repository contains source code for gRPC libraries for multiple languages written on top of shared C core library
 [./src/core](src/core), but the KasperskyOS adaptation is realized only for C++.
 
-| Language                | Source                              | Status  | KasperskyOS adaptation |
-|-------------------------|-------------------------------------|---------|------------------------|
-| Shared C [core library] | [src/core](src/core)                | 1.8     |       Yes              |
-| C++                     | [src/cpp](src/cpp)                  | 1.8     |       Yes              |
-
 ### Interface
 
 Developers using gRPC typically start with the description of an RPC service (a collection of methods),
@@ -75,7 +70,7 @@ it is desirable to have the ability to start RPCs without blocking the current t
 
 The gRPC programming surface in most languages comes in both synchronous and asynchronous flavors.
 
-[⬆ Back to Top](#Table-of-contents)
+[⬆ Back to Top](#table-of-contents)
 
 ## Streaming
 
@@ -109,19 +104,26 @@ which are then fragmented into HTTP/2 frames at the sender and reassembled at th
 gRPC inherits the flow control mechanisms in HTTP/2 and uses them
 to enable fine-grained control of the amount of memory used for buffering in-flight messages.
 
-[⬆ Back to Top](#Table-of-contents)
+[⬆ Back to Top](#table-of-contents)
 
 ## Getting started
 
 ### Prerequisites
 
-1. [Install](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.2&customization=KCE_sdk_install_and_remove)
+1. [Install](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=sdk_install_and_remove)
 KasperskyOS Community Edition SDK. You can download the latest version of the KasperskyOS Community Edition for free from
-[os.kaspersky.com](https://os.kaspersky.com/development/). The minimum required version of KasperskyOS Community Edition SDK is 1.2.
-For more information, see [System requirements](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.2&customization=KCE_system_requirements).
-1. Clone gRPC for KasperskyOS repository to your project directory (to reduce cloning time you can use `--depth 1` option):
+[os.kaspersky.com](https://os.kaspersky.com/development/). The minimum required version of KasperskyOS Community Edition SDK is 1.3.
+For more information, see [System requirements](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=system_requirements).
+2. Clone gRPC for KasperskyOS repository to your project directory (to reduce cloning time you can use `--depth 1` option):
     ```sh
      $ git clone --recurse-submodules --shallow-submodules https://github.com/KasperskyLab/grpc-kos.git
+    ```
+3. NTP is a networking protocol for clock synchronization between computer systems.
+   NTP is necessary to gRPC to ensure ssl-encrypted connections between server and client tasks located on different hardware.
+   When it is impossible to access external NTP services, it is recommended to run a local NTP service on the host.
+   The following step shows how to install the NTP server using `apt`:
+    ```sh
+     $ sudo apt install ntp
     ```
 
 ### Building and installing
@@ -166,7 +168,7 @@ $ ./host-build.sh
 
 You also can build gRPC for corresponding host [manually](BUILDING.md).
 
-[⬆ Back to Top](#Table-of-contents)
+[⬆ Back to Top](#table-of-contents)
 
 #### Build gRPC for KasperskyOS
 
@@ -204,7 +206,7 @@ The value specified in the `-i` option takes precedence over the value of the `I
   Path to the directory where gRPC for the host is installed. If not specified, the default path `./install/host` will be used.
 * `-j, --jobs N`
 
-  Number of jobs for parallel build. If not specified, the default value obtained from the `nproc` command is used.
+  Number of jobs for parallel build. If not specified, the default value is 1.
 
 By default, the build type is set to `Debug`, the build libraries are static,
 and the build path is set to `./build/kos`. To change this, edit the `cross-build.sh` script as needed.
@@ -215,7 +217,7 @@ is listed in the `CMAKE_FIND_ROOT_PATH` environment variable.
 The `cross-build.sh` script builds only runtime libraries.
 The host `protoc` compiler and `gRPC plugin` are used to generate source files from `*.proto` files.
 
-[⬆ Back to Top](#Table-of-contents)
+[⬆ Back to Top](#table-of-contents)
 
 #### Tests
 
@@ -225,7 +227,7 @@ The tests have the following limitations:
 
 * Some tests are disabled. See the list at
 [./test/kos/cmake/grpc_cpp_disabled_tests.cmake](test/kos/cmake/grpc_cpp_disabled_tests.cmake).
-* Death tests not supported on KasperskyOS.
+* Death tests not supported in KasperskyOS.
 * Some tests are skipped. See the list at [./test/kos/cmake/tests.cmake](test/kos/cmake/tests.cmake).
 * Flaky tests:
   * `streaming_throughput_test`
@@ -287,12 +289,12 @@ If not specified, all tests will be executed.
 
   Path to the directory where gRPC for the host is installed. If not specified, the default path `./install/host` will be used.
 
-[⬆ Back to Top](#Table-of-contents)
+[⬆ Back to Top](#table-of-contents)
 
 ## Usage
 
 When you develop a KasperskyOS-based solution, use the
-[recommended structure of project directories](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.2&customization=KCE_cmake_using_sdk_cmake)
+[recommended structure of project directories](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=cmake_using_sdk_cmake)
 to simplify usage of CMake scripts.
 
 For more on using gRPC in KasperskyOS, see the [README.md](./examples/kos/helloworld/README.md) file for the project's example.
@@ -301,13 +303,39 @@ For more on using gRPC in KasperskyOS, see the [README.md](./examples/kos/hellow
 
 Registered trademarks and endpoint marks are the property of their respective owners.
 
-gRPC is a registered trademark of The Linux Foundation in the United States and other countries.
+gRPC, Kubernetes are registered trademarks of The Linux Foundation in the United States and other countries.
 
-GoogleTest, Protobuf are a trademark of Google LLC.
+Android, Chromium, Closure, Dart, Firebase, GoogleTest, Google Go, Protobuf, TensorFlow are trademarks of Google LLC.
 
 Linux is the registered trademark of Linus Torvalds in the U.S. and other countries.
 
 Raspberry Pi is a trademark of the Raspberry Pi Foundation.
+
+AFS, AIX, IBM, s3 are trademarks of International Business Machines Corporation, registered in many jurisdictions worldwide.
+
+AMD is a trademark or a registered trademark of Advanced Micro Devices, Inc.
+
+F5 is a trademark of F5 Networks, Inc. in the U.S. and in certain other countries.
+
+FreeBSD is a registered trademark of The FreeBSD Foundation.
+
+MSDN, Microsoft, PowerShell, Visual C++, Visual Studio, Win32, Windows, Windows Server are trademarks of the Microsoft group of companies.
+
+Mac, macOS, Mac OS, OS X, Objective-C, Rosetta, Xcode are trademarks of Apple Inc.
+
+Firefox, Mozilla are trademarks of the Mozilla Foundation in the U.S. and other countries.
+
+Pentium, Intel are trademarks of Intel Corporation or its subsidiaries.
+
+Python is a trademark or registered trademark of the Python Software Foundation.
+
+Fedora, Red Hat are trademarks or registered trademarks of Red Hat, Inc. or its subsidiaries in the United States and other countries.
+
+Symantec is a registered trademark of Symantec Corporation or its affiliates in the U.S. and other countries.
+
+UNIX is a registered trademark in the United States and other countries, licensed exclusively through X/Open Company Limited.
+
+IOS is a registered trademark of Cisco Systems, Inc. and/or its affiliates in the United States and certain other countries.
 
 # Contributing
 
@@ -315,8 +343,8 @@ Only KasperskyOS-specific changes can be approved. See [CONTRIBUTING.md](CONTRIB
 
 # Licensing
 
-This project is licensed under the terms of the Apache License 2.0 license. See [LICENSE](LICENSE) for more information.
+This project is licensed under the terms of the Apache License. See [LICENSE](LICENSE) for more information.
 
-[⬆ Back to Top](#Table-of-contents)
+[⬆ Back to Top](#table-of-contents)
 
-© 2024 AO Kaspersky Lab
+© 2025 AO Kaspersky Lab

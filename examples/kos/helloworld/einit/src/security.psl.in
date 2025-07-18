@@ -1,4 +1,4 @@
-/* © 2024 AO Kaspersky Lab
+/* © 2025 AO Kaspersky Lab
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ use EDL Einit
 use EDL kl.core.Core
 use EDL kl.VfsSdCardFs
 use EDL kl.VfsNet
+use EDL kl.Ntpd
 use EDL helloworld.@MAIN_TASK@
 @INIT_EXTERNAL_ENTITIES@
 
@@ -47,6 +48,7 @@ request dst = kl.core.Core
     match src = Einit                     { grant () }
     match src = helloworld.@MAIN_TASK@    { grant () }
     match src = kl.bc.BlobContainer       { grant () }
+    match src = kl.Ntpd                   { grant () }
 }
 
 /* Any client in the solution is allowed to query
@@ -63,6 +65,14 @@ request src = kl.bc.BlobContainer
 /* A client of the kl.rump.Dhcpcd class is allowed to query a server
  * of the kl.VfsNet and kl.VfsSdCardFs classes. */
 request src = kl.rump.Dhcpcd
+{
+    match dst = kl.VfsSdCardFs            { grant () }
+    match dst = kl.VfsNet                 { grant () }
+}
+
+/* A client of the kl.Ntpd class is allowed to query a server
+ * of the kl.VfsNet and kl.VfsSdCardFs classes. */
+request src = kl.Ntpd
 {
     match dst = kl.VfsSdCardFs            { grant () }
     match dst = kl.VfsNet                 { grant () }

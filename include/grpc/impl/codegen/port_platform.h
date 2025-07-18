@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * © 2024 AO Kaspersky Lab
+ * © 2025 AO Kaspersky Lab
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
@@ -398,7 +398,7 @@
 #define GPR_POSIX_TMPFILE 1
 #define GPR_POSIX_STAT 1
 #define GPR_POSIX_STRING 1
-#define GPR_POSIX_SUBPROCESS 1
+#undef GPR_POSIX_SUBPROCESS
 #define GPR_POSIX_SYNC 1
 #define GPR_POSIX_TIME 1
 #define GPR_GETPID_IN_UNISTD_H 1

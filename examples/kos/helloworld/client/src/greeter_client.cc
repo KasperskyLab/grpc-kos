@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * © 2024 AO Kaspersky Lab
+ * © 2025 AO Kaspersky Lab
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
@@ -29,7 +29,7 @@ using helloworld::HelloRequest;
 
 GreeterClient::GreeterClient(std::shared_ptr<Channel> channel)
     : m_stub(Greeter::NewStub(channel))
-{    
+{
 }
 
 // Assembles the client's payload, sends it and presents the response back
@@ -51,7 +51,7 @@ std::string GreeterClient::SayHello(const std::string& user)
     const Status status = m_stub->SayHello(&context, request, &reply);
 
     // Act upon its status.
-    if (status.ok()) 
+    if (status.ok())
     {
         return reply.message();
     }
