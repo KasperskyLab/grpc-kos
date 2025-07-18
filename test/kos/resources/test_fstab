@@ -11,19 +11,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-entities:
-
-- name: helloworld.GreeterServer
-  env:
-    VFS_FILESYSTEM_BACKEND: client:kl.VfsSdCardFs
-    VFS_NETWORK_BACKEND: client:kl.VfsNet
-@INIT_GreeterServer_ENTITY_ENV+@
-  connections:
-  - target: kl.VfsSdCardFs
-    id: kl.VfsSdCardFs
-  - target: kl.VfsNet
-    id: kl.VfsNet
-@INIT_GreeterServer_ENTITY_CONNECTIONS+@
-@INIT_GreeterServer_ENTITY_ARGS@
-
-@INIT_EXTERNAL_ENTITIES@
+devfs /dev devfs 0
+romfs /etc romfs ro

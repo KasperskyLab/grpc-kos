@@ -1,4 +1,4 @@
-# © 2024 AO Kaspersky Lab
+# © 2025 AO Kaspersky Lab
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,39 +12,38 @@
 # limitations under the License.
 
 set(DISABLED_CXX_TESTS
-# SO_REUSEPORT is not defined on KasperskyOS
+# SO_REUSEPORT not defined in KasperskyOS so not compiles
   oracle_event_engine_posix_test
-# [VFS_SERVER_OCAP] handle_set_alloc failed create user object for handle Quota exceeded
-  stranded_event_test
-  tls_key_export_test
-  too_many_pings_test
-  message_allocator_end2end_test
-  hybrid_end2end_test
-  unknown_frame_bad_client_test
-  remove_stream_from_stalled_lists_test
-  rls_end2end_test
-  xds_core_end2end_test
-  xds_csds_end2end_test
-  xds_fault_injection_end2end_test
-  xds_outlier_detection_end2end_test
-  xds_rls_end2end_test
-  grpc_tool_test
-  alts_concurrent_connectivity_test
-  client_callback_end2end_test
-  client_channel_stress_test
-  settings_timeout_test
-  client_lb_end2end_test
-  end2end_test
-  grpclb_end2end_test
-  xds_cluster_end2end_test
-  xds_ring_hash_end2end_test
-  xds_cluster_type_end2end_test
-  xds_routing_end2end_test
-  xds_end2end_test
-  streaming_throughput_test
-# Timed out (poll)
-  channelz_service_test
-# Currently not supported on KasperskyOS.
+# Only for apple
+  cfstream_test
+# Only for Linux
+  flaky_network_test
+# Flaky
+ client_lb_end2end_test
+ end2end_test
+ streaming_throughput_test
+ settings_timeout_test
+ stranded_event_test
+ tls_key_export_test
+ too_many_pings_test
+ message_allocator_end2end_test
+ hybrid_end2end_test
+ unknown_frame_bad_client_test
+ remove_stream_from_stalled_lists_test
+ rls_end2end_test
+ xds_core_end2end_test
+ xds_csds_end2end_test
+ xds_fault_injection_end2end_test
+ xds_outlier_detection_end2end_test
+ xds_rls_end2end_test
+ grpc_tool_test
+ alts_concurrent_connectivity_test
+ client_callback_end2end_test
+ ds_routing_end2end_test
+ channelz_service_test
+# Currently not supported in KasperskyOS.
+  httpcli_test
+  httpscli_test
   initial_settings_frame_bad_client_test
   large_metadata_bad_client_test
   headers_bad_client_test
@@ -56,6 +55,7 @@ set(DISABLED_CXX_TESTS
   badreq_bad_client_test
   duplicate_header_bad_client_test
   tcp_client_posix_test
+  client_channel_stress_test
   grpc_cli
   http2_client
   interop_client
@@ -64,9 +64,10 @@ set(DISABLED_CXX_TESTS
   qps_worker
   xds_interop_client
   xds_interop_server
-  lb_get_cpu_stats_test
-  stack_tracer_test
-  system_roots_test
-  thread_stress_test
-  examine_stack_test
+# Not implemented in KasperskyOS
+ lb_get_cpu_stats_test
+ stack_tracer_test
+ system_roots_test
+ thread_stress_test
+ examine_stack_test
 )

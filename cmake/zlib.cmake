@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# © 2025 AO Kaspersky Lab
+# Licensed under the Apache License, Version 2.0 (the "License")
 
 # The CMakeLists.txt for zlib doesn't propagate include directories
 # transitively so `_gRPC_ZLIB_INCLUDE_DIR` should be set for gRPC
@@ -43,6 +46,9 @@ if(gRPC_ZLIB_PROVIDER STREQUAL "module")
     set(gRPC_INSTALL FALSE)
   endif()
 elseif(gRPC_ZLIB_PROVIDER STREQUAL "package")
+  if(KOS)
+    set(ZLIB_USE_STATIC_LIBS YES)
+  endif()
   # zlib installation directory can be configured by setting ZLIB_ROOT
   # We allow locating zlib using both "CONFIG" and "MODULE" as the expectation
   # is that many Linux systems will have zlib installed via a distribution

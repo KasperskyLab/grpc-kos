@@ -1,4 +1,14 @@
 # Changelog
+ 
+## Release for KasperskyOS Community Edition SDK 1.3 - 2025-07
+
+### Changes
+
+* Updated STANDARD_GNU compiler flag to version 17
+* Added support for the Radxa ROCK 3A hardware platform
+* Used zlib library for unit tests from KasperskyOS CE SDK
+* Updated third party dependencies
+* Disabled crypto instructions for Raspberry Pi 4B
 
 ## Release for KasperskyOS Community Edition SDK 1.2 - 2024-12
 

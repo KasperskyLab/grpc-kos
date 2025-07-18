@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# © 2024 AO Kaspersky Lab
+# © 2025 AO Kaspersky Lab
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,6 +18,8 @@ KOS_DIR="$(dirname "$(realpath "${0}")")"
 ROOT_DIR="$(dirname "${KOS_DIR}")"
 BUILD="${ROOT_DIR}/build/host"
 INSTALL="${ROOT_DIR}/install/host"
+WITH_TESTS=OFF
+TARGET=install
 JOBS=`nproc`
 
 PrintHelp () {
@@ -54,12 +56,20 @@ while [ -n "${1}" ]; do
         shift ;;
     -j | --jobs) JOBS="${2}"
         shift ;;
+    -t | --target) TARGET="${2}"
+        shift ;;
+    --with-tests) WITH_TESTS=ON ;;
     *) echo "Unknown option -'${1}'."
         PrintHelp
         exit 1;;
     esac
     shift
 done
+
+if [ "${WITH_TESTS}" == "ON" ]; then
+    BUILD="${BUILD}_tests"
+    [ -z "${INSTALL_PREFIX}" ] && INSTALL_PREFIX="${INSTALL}_tests"
+fi
 
 if [ -z "${INSTALL_PREFIX}" ]; then
     INSTALL_PREFIX="${INSTALL}"
@@ -70,7 +80,7 @@ cmake -B "${BUILD}" \
       -D CMAKE_BUILD_TYPE:STRING=Debug \
       -D CMAKE_INSTALL_PREFIX:STRING="${INSTALL_PREFIX}" \
       -D gRPC_INSTALL=ON \
-      -D gRPC_BUILD_TESTS=OFF \
+      -D gRPC_BUILD_TESTS=${WITH_TESTS} \
       -D ABSL_PROPAGATE_CXX_STD=ON \
       "${ROOT_DIR}" && \
-cmake --build "${BUILD}" -j${JOBS} --target install
+cmake --build "${BUILD}" -j ${JOBS} --target ${TARGET}

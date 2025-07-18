@@ -1,4 +1,4 @@
-# © 2024 AO Kaspersky Lab
+# © 2025 AO Kaspersky Lab
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -48,8 +48,9 @@ function(add_gtest_target TEST_TARGET)
     TEST_TYPE gtest
     ARGUMENTS ${TEST_ARGS}
     VARIABLES ${TEST_ENV_VARIABLES}
-    WITH_NETWORK ON
+    WITH_NETWORK
     ENTITY_HAS_VFS YES
+    FSTAB_FILE ${KOS_TEST_DIR}/resources/test_fstab
     FILES ${TEST_FILES}
     FILES_TO_COPY ${TEST_FILES_TO_COPY}
   )

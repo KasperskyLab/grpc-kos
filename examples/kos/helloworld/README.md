@@ -24,7 +24,7 @@ which employs Secure Sockets Layer (SSL)/Transport Layer Security (TLS) authenti
       - [QEMU](#qemu)
         - [Scenarios 1 and 3](#scenarios-1-and-3)
         - [Scenarios 2 and 4](#scenarios-2-and-4)
-      - [Raspberry Pi 4 B](#raspberry-pi-4-b)
+      - [Hardware](#hardware)
         - [Scenarios 1 and 3](#scenarios-1-and-3-1)
         - [Scenarios 2 and 4](#scenarios-2-and-4-1)
       - [CMake input files](#cmake-input-files)
@@ -42,15 +42,17 @@ which employs Secure Sockets Layer (SSL)/Transport Layer Security (TLS) authenti
 and as the Linux client in scenarios 2 and 4.
 * `GreeterServer`—Program serves as the server that implements a gRPC service in different scenarios, acting as the KasperskyOS server
 in scenarios 2 and 4, and as the Linux server in scenarios 1 and 3.
-* `VfsNet`—Program that is used for working with the network
+* `VfsNet`—Program that is used for working with the network.
 * `Dhcpcd`—DHCP client implementation program that gets network interface parameters from an external DHCP server in the background and
-passes them to the virtual file system
-* `DNetSrv`—Driver for working with network cards
-* `VfsSdCardFs`—Program that supports the SD card file system
-* `BlobContainer`—Program that loads dynamic libraries used by other programs into shared memory
-* `SDCard`—SD card driver
-* `EntropyEntity`—Random number generator
-* `BSP`—Driver for configuring pin multiplexing parameters (pinmux)
+passes them to the virtual file system.
+* `DNetSrv`—Driver for working with network cards.
+* `VfsSdCardFs`—Program that supports the SD card file system.
+* `BlobContainer`—Program that loads dynamic libraries used by other programs into shared memory.
+* `SDCard`—SD card driver.
+* `EntropyEntity`—Random number generator.
+* `BSP`—Driver for configuring pin multiplexing parameters (pinmux).
+* `Ntpd`—Program that sets and maintains the system time of day in synchronism with Internet standard time servers.
+* `Bcm2711MboxArmToVc`—Driver for working with the VideoCore (VC6) coprocessor via mailbox technology for Raspberry Pi 4 B.
 
 ### General scenario
 
@@ -70,7 +72,7 @@ and returns a response with the prefix.
 The client repeats this process 20,000 times with a 2-second interval between each request.
 1. Once the interaction is completed, both the client and the server close the connection and terminate their execution.
 
-[⬆ Back to Top](#Table-of-contents)
+[⬆ Back to Top](#table-of-contents)
 
 ### Initialization description
 
@@ -93,6 +95,8 @@ The client repeats this process 20,000 times with a 2-second interval between ea
 * `kl.drivers.DNetSrv` → `kl.bc.BlobContainer`
 * `kl.drivers.BSP` → `kl.bc.BlobContainer`
 * `kl.drivers.Bcm2711MboxArmToVc` → `kl.bc.BlobContainer`
+* `kl.Ntpd` → `kl.VfsSdCardFs`
+* `kl.Ntpd` → `kl.VfsNet`
 
 </details>
 
@@ -115,32 +119,34 @@ The client repeats this process 20,000 times with a 2-second interval between ea
 The [`./einit/src/client.init.yaml.in`](einit/src/client.init.yaml.in) and the
 [`./einit/src/server.init.yaml.in`](einit/src/server.init.yaml.in) templates are used to automatically generate part of the solution
 initialization description file `init.yaml`. For more information about the `init.yaml.in` template file, see the
-[KasperskyOS Community Edition Online Help](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.2&customization=KCE_cmake_yaml_templates).
+[KasperskyOS Community Edition Online Help](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=cmake_yaml_templates).
 
-[⬆ Back to Top](#Table-of-contents)
+[⬆ Back to Top](#table-of-contents)
 
 ### Security policy description
 
 The [`./einit/src/security.psl.in`](einit/src/security.psl.in) template is used to automatically generate part of the `security.psl` file
 using CMake tools. The `security.psl` file contains part of a solution security policy description.
 For more information about the `security.psl` file, see
-[Describing a security policy for a KasperskyOS-based solution](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.2&customization=KCE_ssp_descr).
+[Describing a security policy for a KasperskyOS-based solution](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=ssp_descr).
 
-[⬆ Back to Top](#Table-of-contents)
+[⬆ Back to Top](#table-of-contents)
 
 ## Getting started
 
 ### Prerequisites
 
 1. To install [KasperskyOS Community Edition SDK](https://os.kaspersky.com/development/)
-and run examples on the Raspberry Pi hardware platform, make sure you meet all the
-[System requirements](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.2&customization=KCE_system_requirements)
+and run examples on a hardware platform, make sure you meet all the
+[System requirements](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=system_requirements)
 listed in the KasperskyOS Community Edition Developer's Guide.
+    * Add the path to the KasperskyOS SDK toolchain to the PATH environment variable `export PATH=/opt/KasperskyOS-Community-Edition-<SDK-version>/toolchain/bin:$PATH`.
 1. You have built and installed gRPC for Linux host operation system.
 1. You have built and installed gRPC for KasperskyOS.
 1. If you have previously built the example, delete the `./build` directory with artifacts from the previous build.
+1. You have installed NTP for Linux host operation system.
 
-[⬆ Back to Top](#Table-of-contents)
+[⬆ Back to Top](#table-of-contents)
 
 ### Building and running the example
 
@@ -193,9 +199,9 @@ The value specified in the `-s` option takes precedence over the value of the `S
   * `qemu` to build a KasperskyOS-based solution image named `kos-qemu-image` that includes the KasperskyOS server/client
 and to run this solution on QEMU.
   * `image` to build a KasperskyOS-based solution image named `kos-image` that includes the KasperskyOS server/client.
-This image is for running on Raspberry Pi 4 B.
-  * `rpi` to build a file system image named `rpi4kos.img` for a bootable SD card. The following is loaded into the file system image:
-`kos-image`, U-Boot bootloader that starts the example, and the firmware for Raspberry Pi 4 B.
+This image is for running on supported hardware.
+  * `sdimage` to create a file system image for a bootable device for hardware. The following is loaded into the file system image:
+`kos-image`, U-Boot bootloader that starts the example, and the firmware for supported hardware.
 * `-K, --kos-install PATH`
 
   Path to directory where gRPC for KasperskyOS is installed. If not specified, the default path `<root_directory>/install/kos` will be used,
@@ -214,7 +220,7 @@ where `root_directory` is the root directory containing the project's source fil
   Help text.
 
 For more information, see the section
-[Building the examples](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.2&customization=KCE_building_sample_programs)
+[Building the examples](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=building_sample_programs)
 in the KasperskyOS Community Edition Online Help.
 
 #### QEMU
@@ -236,15 +242,27 @@ The `cross-build.sh` script both builds the solution on QEMU and runs it.
 Running `build.sh` builds the host and runs the Linux client.
 
 For more information, see the section
-[Running examples on QEMU](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.2&customization=KCE_running_sample_programs_qemu)
+[Running examples on QEMU](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=running_sample_programs_qemu)
 in the KasperskyOS Community Edition Online Help.
 
-#### Raspberry Pi 4 B
+#### Hardware
 
-Before reading this section, it is recommended that you read the following sections
-[Preparing Raspberry Pi 4 B to run examples](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.2&customization=KCE_preparing_sd_card_rpi)
-and [Running examples on Raspberry Pi 4 B](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.2&customization=KCE_running_sample_programs_rpi)
-in the KasperskyOS Community Edition Online Help.
+Before reading this section, it is recommended that you read the following sections in the KasperskyOS Community Edition Online Help:
+1. Preparing the required hardware platform and bootable SD card:
+    * [Raspberry Pi 4 B](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=preparing_sd_card_rpi)
+    * [Radxa ROCK 3A](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=preparing_sd_card_radxa)
+1. Running the example:
+[KasperskyOS Community Edition Online Help](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=running_sample_programs_rpi)
+
+**Note:** Scenarios 3 and 4 demonstrate secure connections between server and client.
+gRPC uses ssl-encryption that requires NTP to get current time.
+For private networks or when external NTP services are unavailable, external NTP services can be replaced by a local NTP service running on the host.
+
+Before creating a KasperskyOS-based solution, update the following configuration file:
+   `<root_directory>/examples/kos/helloworld/resources/hdd/etc/ntp.conf`.
+The `ntp.conf` file should contain the following line:
+   `server host_ip_address`
+Where `host_ip_address' is the ip address of the host running the NTP server.
 
 ##### Scenarios 1 and 3
 
@@ -253,48 +271,49 @@ Running `build.sh` builds the host and runs the Linux server.
 Running `cross-build.sh` with `-p image` option creates the `kos-image` KasperskyOS-based solution image that includes the KasperskyOS client.
 This image is located in the `<root_directory>/build/example_kos/build/kos/client/einit` directory.
 
-1. Prepare a bootable SD card manually or automatically according to the instructions in the section
-[Preparing Raspberry Pi 4 B to run examples](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.2&customization=KCE_preparing_sd_card_rpi)
-in the KasperskyOS Community Edition Online Help.
+1. Check if the correct server IP address is specified in the "targetEndpoint" variable in client/src/main.cc. By default it is set to 10.0.2.2, which is the default IP address for QEMU.
+1. Prepare the required hardware platform and bootable SD card by following the instructions in the KasperskyOS Community Edition Online Help:
+    * [Raspberry Pi 4 B](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=preparing_sd_card_rpi)
+    * [Radxa ROCK 3A](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=preparing_sd_card_radxa)
 1. Copy the `kos-image` to the bootable SD card.
-1. Connect the bootable SD card to the Raspberry Pi 4 B.
-1. Supply power to the Raspberry Pi 4 B and wait for the example to run.
+1. Connect the bootable SD card to the hardware.
+1. Supply power to the hardware and wait for the example to run.
 
-Running `cross-build.sh` with `-p rpi` option creates the `rpi4kos.img` file system image for a bootable SD card.
+Running `cross-build.sh` with `-p sdimage` option creates the `hdd.img` file system image for a bootable SD card.
 This image is located in the `<root_directory>/build/example_kos/build/kos/client` directory.
 
-1. To copy the `rpi4kos.img` bootable SD card image to the SD card, connect the SD card to the computer and run the following command:
+1. To copy the `hdd.img` bootable SD card image to the SD card, connect the SD card to the computer and run the following command:
 
-    `$ sudo dd bs=64k if=build/example_kos/build/kos/client/rpi4kos.img of=/dev/sd[X] conv=fsync`,
+    `$ sudo dd bs=64k if=build/example_kos/build/kos/client/hdd.img of=/dev/sd[X] conv=fsync`,
 
     where `[X]` is the final character in the name of the SD card block device.
 
-1. Connect the bootable SD card to the Raspberry Pi 4 B.
-1. Supply power to the Raspberry Pi 4 B and wait for the example to run.
+1. Connect the bootable SD card to the hardware.
+1. Supply power to the hardware and wait for the example to run.
 
 ##### Scenarios 2 and 4
 
 Running `cross-build.sh` with `-p image` option creates the `kos-image` KasperskyOS-based solution image that includes the KasperskyOS server.
 This image is located in the `<root_directory>/build/example_kos/build/kos/server/einit` directory.
 
-1. Prepare a bootable SD card manually or automatically according to the instructions in the section
-[Preparing Raspberry Pi 4 B to run examples](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.2&customization=KCE_preparing_sd_card_rpi)
-in the KasperskyOS Community Edition Online Help.
+1. Prepare the required hardware platform and bootable SD card by following the instructions in the KasperskyOS Community Edition Online Help:
+    * [Raspberry Pi 4 B](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=preparing_sd_card_rpi)
+    * [Radxa ROCK 3A](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=preparing_sd_card_radxa)
 1. Copy the `kos-image` to the bootable SD card.
-1. Connect the bootable SD card to the Raspberry Pi 4 B.
-1. Supply power to the Raspberry Pi 4 B and wait for the example to run.
+1. Connect the bootable SD card to the hardware.
+1. Supply power to the hardware and wait for the example to run.
 
-Running `cross-build.sh` with `-p rpi` option creates the `rpi4kos.img` file system image for a bootable SD card.
+Running `cross-build.sh` with `-p sdimage` option creates the `hdd.img` file system image for a bootable SD card.
 This image is located in the `<root_directory>/build/example_kos/build/kos/server` directory.
 
-1. To copy the `rpi4kos.img` bootable SD card image to the SD card, connect the SD card to the computer and run the following command:
+1. To copy the `hdd.img` bootable SD card image to the SD card, connect the SD card to the computer and run the following command:
 
-    `$ sudo dd bs=64k if=build/example_kos/build/kos/server/rpi4kos.img of=/dev/sd[X] conv=fsync`,
+    `$ sudo dd bs=64k if=build/example_kos/build/kos/server/hdd.img of=/dev/sd[X] conv=fsync`,
 
     where `[X]` is the final character in the name of the SD card block device.
 
-1. Connect the bootable SD card to the Raspberry Pi 4 B.
-1. Supply power to the Raspberry Pi 4 B and wait for the example to run.
+1. Connect the bootable SD card to the hardware.
+1. Supply power to the hardware and wait for the example to run.
 
 Running `build.sh` builds the host and runs the Linux client.
 
@@ -318,7 +337,7 @@ Running `build.sh` builds the host and runs the Linux client.
 
   CMake commands for building the solution.
 
-[⬆ Back to Top](#Table-of-contents)
+[⬆ Back to Top](#table-of-contents)
 
 ## Usage
 
@@ -444,6 +463,6 @@ Running `build.sh` builds the host and runs the Linux client.
     ...
     ```
 
-[⬆ Back to Top](#Table-of-contents)
+[⬆ Back to Top](#table-of-contents)
 
-© 2024 AO Kaspersky Lab
+© 2025 AO Kaspersky Lab

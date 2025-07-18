@@ -19,7 +19,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# © 2024 AO Kaspersky Lab
+# © 2025 AO Kaspersky Lab
 # Licensed under the Apache License, Version 2.0 (the "License")
 
 cmake_minimum_required(VERSION 3.5.1)
@@ -274,6 +274,15 @@ endif()
 if (MINGW)
   add_definitions(-D_WIN32_WINNT=0x600)
 endif()
+
+# Disable crypto instructions for rpi4b because it doesn't have crypto engine.
+if (KOS)
+  if ("${CMAKE_SYSTEM_SOC}" MATCHES "BCM2711")
+    STRING (REPLACE "-mcpu=cortex-a72" "-mcpu=cortex-a72+noaes -march=armv8-a+noaes" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    STRING (REPLACE "-mcpu=cortex-a72" "-mcpu=cortex-a72+noaes -march=armv8-a+noaes" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
+  endif ()
+endif ()
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_gRPC_C_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${_gRPC_C_CXX_FLAGS}")
 

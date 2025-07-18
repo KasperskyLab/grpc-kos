@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * © 2024 AO Kaspersky Lab
+ * © 2025 AO Kaspersky Lab
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
@@ -25,7 +25,7 @@
 
 class GreeterServiceImpl final : public helloworld::Greeter::Service
 {
-    grpc::Status SayHello(grpc::ServerContext* context, 
-                const helloworld::HelloRequest* request, 
+    grpc::Status SayHello(grpc::ServerContext* context,
+                const helloworld::HelloRequest* request,
                 helloworld::HelloReply* reply) override;
 };

@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2025 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #include <vector>
@@ -22,10 +24,20 @@
 
 #include "test/cpp/util/test_config.h"
 
+#ifdef __KOS__
+#include <kos_net.h>
+#endif
+
 namespace grpc {
 namespace testing {
 
 void InitTest(int* argc, char*** argv, bool remove_flags) {
+#ifdef __KOS__
+  if (!wait_for_network()) {
+    perror("wait_for_network failed\n");
+    throw std::runtime_error("KasperskyOS fail to up network");
+  }
+#endif
   std::vector<char*> reduced_argv = absl::ParseCommandLine(*argc, *argv);
   if (remove_flags) {
     *argc = reduced_argv.size();

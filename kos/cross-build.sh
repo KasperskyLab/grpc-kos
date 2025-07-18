@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# © 2024 AO Kaspersky Lab
+# © 2025 AO Kaspersky Lab
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,21 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 PROJECT_NAME=gRPC
 KOS_DIR="$(dirname "$(realpath "${0}")")"
 ROOT_DIR="$(dirname "${KOS_DIR}")"
+
 BUILD="${ROOT_DIR}/build/kos"
 BUILD_HOST="${BUILD}/host"
 BUILD_KOS="${BUILD}/kos"
-INSTALL="${ROOT_DIR}/install"
-INSTALL_HOST="${INSTALL}/host"
-INSTALL_KOS="${INSTALL}/kos"
-JOBS=`nproc`
+DEFAULT_INSTALL_PREFIX="${ROOT_DIR}/install"
+INSTALL_HOST="${DEFAULT_INSTALL_PREFIX}/host"
+INSTALL_KOS="${DEFAULT_INSTALL_PREFIX}/kos"
+JOBS=1
+DEFAULT_BUILD_TYPE=Debug
 
-PrintHelp () {
+function PrintHelp() {
 cat<<HELP
 
-Script for building and installing ${PROJECT_NAME} for KasperskyOS.
+Build and install ${PROJECT_NAME} for KasperskyOS.
 
 USAGE:
 
@@ -44,17 +48,21 @@ OPTIONS:
         The value specified in the -s option takes precedence over the value of the SDK_PREFIX environment variable.
 
     -i, --install PATH
-        Path to directory where ${PROJECT_NAME} for KasperskyOS will be installed.
+        Path to the directory where ${PROJECT_NAME} for KasperskyOS will be installed.
         If not specified, the default path ${INSTALL_KOS} will be used.
         The value specified in the -i option takes precedence over the value of the INSTALL_PREFIX environment variable.
 
     -H, --host-install PATH
-        Path to the directory where gRPC for the host is installed.
+        If this directory does not exist, gRPC for the host will be built and installed to this directory automatically.
         If not specified, the default path ${INSTALL_HOST} will be used.
 
     -j, --jobs N
         Number of jobs for parallel build.
         If not specified, the default value ${JOBS} will be used.
+
+    --build-type TYPE
+        Set build type: release or debug.
+        Default build type is $(echo -n ${DEFAULT_BUILD_TYPE} | tr '[:upper:]' '[:lower:]').
 HELP
 }
 
@@ -67,11 +75,21 @@ while [ -n "${1}" ]; do
         shift;;
     -i | --install) INSTALL_PREFIX="${2}"
         shift;;
-    -j | --jobs) JOBS="${2}"
-        shift ;;
     -H | --host-install) HOST_INSTALL_PREFIX="${2}"
-        shift ;;
-    *) echo "Unknown option -'${1}'."
+        shift;;
+    -j | --jobs) JOBS="${2}"
+        shift;;
+    --build-type)
+        case "${2}" in
+        release) BUILD_TYPE=Release
+            shift;;
+        debug) BUILD_TYPE=Debug
+            shift;;
+        *) echo "Unknown build type - '${2}'."
+            PrintHelp
+            exit 1;;
+        esac;;
+    *) echo "Unknown option - '${1}'."
         PrintHelp
         exit 1;;
     esac
@@ -79,19 +97,34 @@ while [ -n "${1}" ]; do
 done
 
 if [ -z "${SDK_PREFIX}" ]; then
-    echo "Path to installed KasperskyOS SDK is not specified."
+    echo "Path to the installed KasperskyOS SDK is not specified."
     PrintHelp
     exit 1
 fi
 
-export PATH="${SDK_PREFIX}/toolchain/bin:${PATH}"
+if [ -z "${TARGET_PLATFORM}" ]; then
+    echo "Target platform is not specified. Try to autodetect..."
+    TARGET_PLATFORMS=($(ls -d "${SDK_PREFIX}"/sysroot-* | sed 's|.*sysroot-\(.*\)|\1|'))
+    if [ ${#TARGET_PLATFORMS[@]} -gt 1 ]; then
+        echo "More than one target platform found: ${TARGET_PLATFORMS[*]}."
+        echo "Reinstall SDK or remove extra sysroot-* directories."
+        exit 1
+    fi
+
+    export TARGET_PLATFORM=${TARGET_PLATFORMS[0]}
+    echo "Platform ${TARGET_PLATFORM} will be used."
+fi
+
+if [ -z "${INSTALL_PREFIX}" ]; then
+    export INSTALL_PREFIX="${INSTALL_KOS}"
+    echo "Install path is not specified."
+    echo "Use default install path - ${INSTALL_PREFIX}."
+fi
 
 if [ -z "${HOST_INSTALL_PREFIX}" ]; then
     export HOST_INSTALL_PREFIX="${INSTALL_HOST}"
-    if [ ! -e "${HOST_INSTALL_PREFIX}" ]; then
-      "${KOS_DIR}"/host-build.sh -i "${HOST_INSTALL_PREFIX}" -j ${JOBS}
-      [ $? -ne 0 ] && echo "Host build failed!" && exit 1
-  fi
+    echo "Host install path is not specified."
+    echo "Use default host install path - ${HOST_INSTALL_PREFIX}."
 fi
 
 # HOST_INSTALL_PREFIX must be absolute path.
@@ -99,45 +132,31 @@ if [[ "${HOST_INSTALL_PREFIX}" != /* ]]; then
     HOST_INSTALL_PREFIX="${PWD}/${HOST_INSTALL_PREFIX}"
 fi
 
-if [ -z "${TARGET}" ]; then
-    echo "Target platform is not specified, try to autodetect..."
-    TARGETS=($(ls -d "${SDK_PREFIX}"/sysroot-* | sed 's|.*sysroot-\(.*\)|\1|'))
-    if [ ${#TARGETS[@]} -gt 1 ]; then
-        echo "More than one target platform found: ${TARGETS[*]}."
-        echo "Use TARGET environment variable to specify exact platform."
-        exit 1
-    fi
-
-    export TARGET=${TARGETS[0]}
-    echo "Platform ${TARGET} will be used."
-fi
-
-if [ -z "${INSTALL_PREFIX}" ]; then
-    export INSTALL_PREFIX="${INSTALL_KOS}"
-    echo "Installation path of gRPC for KasperskyOS is not specified."
-    echo "Default path ${INSTALL_PREFIX} will be used."
+if [ -z "${BUILD_TYPE}" ]; then
+    export BUILD_TYPE=${DEFAULT_BUILD_TYPE}
+    echo "Use default build type - ${BUILD_TYPE}."
 fi
 
 export LANG=C
 export PKG_CONFIG=""
-export BUILD_WITH_CLANG=
-export BUILD_WITH_GCC=
+export PATH="${SDK_PREFIX}/toolchain/bin:${PATH}"
 
-TOOLCHAIN_SUFFIX=""
+TOOLCHAIN_SUFFIX="-clang"
 
-if [ "${BUILD_WITH_CLANG}" == "y" ];then
-    TOOLCHAIN_SUFFIX="-clang"
+if [ ! -e "${HOST_INSTALL_PREFIX}" ]; then
+    echo "Host gRPC directory ${HOST_INSTALL_PREFIX} does not exist."
+    echo "Starting host gRPC build..."
+    "${KOS_DIR}"/host-build.sh -i "${HOST_INSTALL_PREFIX}" -j ${JOBS}
+    if [ $? -ne 0 ]; then
+        echo "Host build failed!"
+        exit 1
+    fi
+else
+    echo "Host gRPC directory ${HOST_INSTALL_PREFIX} exists."
+    echo "Skipping host gRPC build."
 fi
 
-if [ "${BUILD_WITH_GCC}" == "y" ];then
-    TOOLCHAIN_SUFFIX="-gcc"
-fi
-
-cmake -G "Unix Makefiles" -B "${BUILD}" \
-      -D CMAKE_BUILD_TYPE:STRING=Debug \
-      -D CMAKE_INSTALL_PREFIX:STRING="${INSTALL_PREFIX}" \
-      -D CMAKE_FIND_ROOT_PATH="${HOST_INSTALL_PREFIX};${PREFIX_DIR}/sysroot-${TARGET}" \
-      -D CMAKE_TOOLCHAIN_FILE="${SDK_PREFIX}/toolchain/share/toolchain-${TARGET}${TOOLCHAIN_SUFFIX}.cmake" \
+"${SDK_PREFIX}/toolchain/bin/cmake" -G "Unix Makefiles" -B "${BUILD}" \
       -D ABSL_PROPAGATE_CXX_STD=ON \
       -D RE2_BUILD_TESTING=OFF \
       -D protobuf_BUILD_TESTS=OFF \
@@ -151,5 +170,9 @@ cmake -G "Unix Makefiles" -B "${BUILD}" \
       -D gRPC_BUILD_GRPC_PHP_PLUGIN=OFF \
       -D gRPC_BUILD_GRPC_PYTHON_PLUGIN=OFF \
       -D gRPC_BUILD_GRPC_RUBY_PLUGIN=OFF \
-      "${ROOT_DIR}" && \
-cmake --build "${BUILD}" -j ${JOBS} --target install
+      -D gRPC_ZLIB_PROVIDER=package \
+      -D CMAKE_BUILD_TYPE:STRING=${BUILD_TYPE} \
+      -D CMAKE_INSTALL_PREFIX:STRING="${INSTALL_PREFIX}" \
+      -D CMAKE_FIND_ROOT_PATH="${HOST_INSTALL_PREFIX};${PREFIX_DIR}/sysroot-${TARGET_PLATFORM}" \
+      -D CMAKE_TOOLCHAIN_FILE="${SDK_PREFIX}/toolchain/share/toolchain-${TARGET_PLATFORM}${TOOLCHAIN_SUFFIX}.cmake" \
+      "${ROOT_DIR}" && "$SDK_PREFIX/toolchain/bin/cmake" --build "${BUILD}" -j${JOBS} --target install

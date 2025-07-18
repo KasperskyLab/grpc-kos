@@ -1,4 +1,4 @@
-# © 2024 AO Kaspersky Lab
+# © 2025 AO Kaspersky Lab
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,6 +31,15 @@ if(KOS)
   # Include the CMake library named nk for working with the NK compiler (nk-gen-c).
   include(platform/nk)
 
+  # Detect board.
+  if(CMAKE_SYSTEM_SOC STREQUAL "BCM2711")
+    set(BOARD "RPI4_BCM2711")
+  elseif(CMAKE_SYSTEM_SOC STREQUAL "RK3568")
+    set(BOARD "RADXA_ROCK_3A")
+  else()
+    message(FATAL_ERROR "Unsupported board for SoC '${CMAKE_SYSTEM_SOC}'")
+  endif()
+
   # Include the vfs package with VFS libraries.
   find_package(vfs REQUIRED)
   include_directories(${vfs_INCLUDE})
@@ -42,6 +51,13 @@ if(KOS)
   # Include the vfs package with VFS executable files.
   find_package(precompiled_vfs REQUIRED)
   include_directories(${precompiled_vfs_INCLUDE})
+
+  # Search for the ntpd programm.
+  find_program (NTPD
+                NAMES "ntpd" REQUIRED
+                NO_CMAKE_PATH
+                NO_CMAKE_ENVIRONMENT_PATH
+                NO_SYSTEM_ENVIRONMENT_PATH)
 
   find_package(Threads REQUIRED)
 endif()

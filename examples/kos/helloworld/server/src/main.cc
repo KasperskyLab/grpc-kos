@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * © 2024 AO Kaspersky Lab
+ * © 2025 AO Kaspersky Lab
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
@@ -30,9 +30,12 @@
 #endif
 
 #include <filesystem>
+#include <thread>
 #include <iostream>
 #include <memory>
 #include <string>
+
+using namespace std::chrono_literals;
 
 namespace
 {
@@ -103,11 +106,11 @@ int main(int argc, char** argv)
             {
                 continue;
             }
-            
+
             throw std::runtime_error("The only acceptable argument is\n" +
                 arg_secure);
         }
-           
+
 #ifdef __KOS__
         std::cout << AppNameTag << "waiting for network..." << std::endl;
         if (!wait_for_network())
@@ -115,11 +118,13 @@ int main(int argc, char** argv)
             std::cout << AppNameTag << "Error: Wait for network failed!" << std::endl;
             return EXIT_FAILURE;
         }
+        // wait for ARP DAD to be done 
+        std::this_thread::sleep_for(5s);
 #endif
 
         constexpr auto ServerAddress = "0.0.0.0:50051";
         std::shared_ptr<grpc::ServerCredentials> credentials;
-        
+
         if(useSecureConnection)
         {
             credentials = GetSecureCredentials();
@@ -129,7 +134,7 @@ int main(int argc, char** argv)
             credentials = grpc::InsecureServerCredentials();
         }
 
-        std::cout << AppNameTag << "using secure connection: " << 
+        std::cout << AppNameTag << "using secure connection: " <<
             std::boolalpha << useSecureConnection << std::endl;
 
         RunServer(ServerAddress, credentials);

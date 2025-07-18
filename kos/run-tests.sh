@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# © 2024 AO Kaspersky Lab
+# © 2025 AO Kaspersky Lab
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -169,7 +169,7 @@ Generate () {
     cmake -B "${BUILD}" -G "Unix Makefiles" \
           -D CMAKE_BUILD_TYPE:STRING=Debug \
           -D CMAKE_TOOLCHAIN_FILE=$SDK_PREFIX/toolchain/share/toolchain-$TARGET.cmake \
-          -D CMAKE_FIND_ROOT_PATH="${HOST_GRPC_INSTALL};${PREFIX_DIR}/sysroot-${TARGET};" \
+          -D CMAKE_PREFIX_PATH="${HOST_GRPC_INSTALL}" \
           -D ABSL_PROPAGATE_CXX_STD=ON \
           -D RE2_BUILD_TESTING=OFF \
           -D protobuf_BUILD_TESTS=OFF \
@@ -181,6 +181,7 @@ Generate () {
           -D gRPC_BUILD_GRPC_PHP_PLUGIN=OFF \
           -D gRPC_BUILD_GRPC_PYTHON_PLUGIN=OFF \
           -D gRPC_BUILD_GRPC_RUBY_PLUGIN=OFF \
+          -D gRPC_ZLIB_PROVIDER=package \
           "${ROOT_DIR}"
 
      if [ $? -ne 0 ]; then

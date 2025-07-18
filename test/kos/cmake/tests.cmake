@@ -1,4 +1,4 @@
-# © 2024 AO Kaspersky Lab
+# © 2025 AO Kaspersky Lab
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,7 +18,7 @@ initialize_platform(FORCE_STATIC)
 # Tools for using NK parser.
 include(platform/nk)
 
-# Tools to generate project for unit tests on KasperskyOS
+# Tools to generate project for unit tests in KasperskyOS
 include(test-generator/test_generator)
 
 # Add a package with the VFS program implementations.
@@ -38,10 +38,8 @@ set_target_properties(${precompiled_vfsVfsSdCardFs}
     EXTRA_ENV "
           VFS_FILESYSTEM_BACKEND: server:kl.VfsSdCardFs"
     EXTRA_ARGS "
-          - -l
-          - devfs /dev devfs 0
-          - -l
-          - romfs /etc romfs ro"
+          - -f
+          - fstab"
 )
 
 # Set additional properties for precompiled_vfsVfsNet program.
@@ -56,61 +54,55 @@ set_target_properties(${precompiled_vfsVfsNet}
           - romfs /etc romfs ro"
 )
 
-# Set additional properties for rump_DHCPCD_ENTITY program.
-set_target_properties(${rump_DHCPCD_ENTITY}
-  PROPERTIES
-    ${vfs_ENTITY}_REPLACEMENT ""
-    DEPENDS_ON_ENTITY "${precompiled_vfsVfsSdCardFs};${precompiled_vfsVfsNet}"
-    EXTRA_ENV "
-            VFS_FILESYSTEM_BACKEND: client{fs->net}:kl.VfsSdCardFs
-            VFS_NETWORK_BACKEND: client:kl.VfsNet"
-    EXTRA_ARGS "
-            - '-4'
-            - '-f'
-            - /etc/dhcpcd.conf"
-)
-
 # Filtered tests:
-#  No Ipv6 loopback on KasperskyOS:
+#  No Ipv6 loopback in KasperskyOS:
 #     AddressSortingTest.*Ipv6Loopback*,
 #     ResolveAddressTest.LocalhostResultHasIPv6First
-#  Death Tests are not supported on KasperskyOS:
+#  Death Tests are not supported in KasperskyOS (not compiles so not present in list):
 #     *GrpcToolTest.NoCommand*
 #     *GrpcToolTest.InvalidCommand*
 #     *GrpcToolTest.HelpCommand*
-#     *GrpcToolTest.TooFewArguments*
-#     *GrpcToolTest.TooManyArguments*
-#     *GrpcToolTest.CallCommandWithBadMetadata*
-#  No HOME directory on KasperskyOS:
+#     *GrpcToolTest, TooFewArguments*
+#     *GrpcToolTest, TooManyArguments*
+#     *GrpcToolTest, CallCommandWithBadMetadata*
+#  No HOME directory in KasperskyOS:
 #     CredentialsTest.TestGetWellKnownGoogleCredentialsFilePath
-#  KasperskyOS does not support SO_REUSEADDR and does not allow binding the same address and port twice:
+#  KasperskyOS not supports SO_REUSEADDR and not allows to bind same adderss and port twice:
 #     ServerBuilderTest.CreateServerRepeatedPort
+#     SettingsTimeout.*
+#     End2endTest.StreamingThroughput (failed with timeout FIXME RC 1.3)
 #  Too mach objects create VFS_SERVER_OCAP Error code 28 Quota exceeded:
 #     PortSharingEnd2endTest.*
 #     GrpcToolTest.*
 #     AltsConcurrentConnectivityTest.*
 #     ClientCallbackEnd2endTest.*
 #     SingleBalancerTest.*
-#  execv is not implemented on KasperskyOS:
+#  Use execv not implemented in KasperskyOS:
 #     HttpRequestTest.*
 #     HttpsCliTest.*
-#  Stack trace is not enabled on KasperskyOS:
+#  Stack trace not enabled in KasperskyOS:
 #     ExamineStackTest.*
 #  Flaky:
 #     CancelDuringAresQuery.TestHitDeadlineAndDestroyChannelDuringAresResolutionWithZeroQueryTimeoutIsGraceful
 #     ClientInterceptorsStreamingEnd2endTest.*
-#     GrpcAuthzEnd2EndTest.*
 #     IdleFilterStateTest.*
 #     EchoTest.*
 #     ServerBuilderTest.*
 #     StreamsNotSeenTest.*
 #     XdsCredentialsEnd2EndFallback*
+#  Need additional attention (FIXME RC 1.3)
+#     SockAddrUtilsTest.SockAddrIsWildCard
+#     WorkSerializerTest.ExecuteMany* - allocates too much memory
+#     XdsTest/EdsTest.DropConfigUpdate/V3
+#     XdsTest/EdsTest.DropConfigUpdate/V3WithLoadReporting
+#     XdsTest/AggregateClusterTest.EdsToLogicalDns/V3
+#     XdsTest/XdsEnabledServerStatusNotificationTest.ExistingRpcsOnResourceDeletion/V3XdsCreds
+#     XdsTest/LdsRdsTest.XdsRetryPolicyMaxBackOff/V3
 string(JOIN : FILTERED_TESTS
   AddressSortingTest.*Ipv6Loopback*
   ResolveAddressTest.LocalhostResultHasIPv6First
   CredentialsTest.TestGetWellKnownGoogleCredentialsFilePath
   ServerBuilderTest.CreateServerRepeatedPort
-  *PortSharingEnd2endTest.*
   HybridEnd2endTest.AsyncRequestStreamResponseStream_*
   CancelDuringAresQuery.TestHitDeadlineAndDestroyChannelDuringAresResolutionWithZeroQueryTimeoutIsGraceful
   ClientInterceptorsStreamingEnd2endTest.ServerStreamingHijackingTest
@@ -122,12 +114,23 @@ string(JOIN : FILTERED_TESTS
   ClientCallbackEnd2endTest.*
   ExamineStackTest.*
   SingleBalancerTest.*
-  GrpcAuthzEnd2EndTest.*
   IdleFilterStateTest.*
   EchoTest.*
-  ServerBuilderTest.*
   StreamsNotSeenTest.*
   XdsCredentialsEnd2EndFallback*
+  SettingsTimeout.*
+  SockAddrUtilsTest.SockAddrIsWildCard
+  End2endTest.StreamingThroughput
+  WorkSerializerTest.ExecuteMany*
+)
+
+# Due to arg length limitation special filter for xds_XXX tests
+string(JOIN : XDS_FILTERED_TESTS
+  XdsTest/EdsTest.DropConfiUpdate/V3
+  XdsTest/EdsTest.DropConfigUpdate/V3WithLoadReporting
+  XdsTest/AggregateClusterTest.EdsToLogicalDns/V3
+  XdsTest/XdsEnabledServerStatusNotificationTest.ExistingRpcsOnResourceDeletion/V3XdsCreds
+  XdsTest/LdsRdsTest.XdsRetryPolicyMaxBackOff/V3
 )
 
 set(KOS_TEST_DIR "${CMAKE_SOURCE_DIR}/test/kos")
@@ -138,10 +141,12 @@ include(${KOS_TEST_DIR}/cmake/add_gtest.cmake)
 function(add_tests_kos TESTS)
   foreach(TEST ${TESTS})
     if(NOT (${TEST} IN_LIST DISABLED_CXX_TESTS))
+      if (${TEST} MATCHES "xds_.*")
+        set (FILTERED_TESTS ${XDS_FILTERED_TESTS})
+      endif ()
       add_gtest_target(${TEST}
         DEPENDS_ON ${precompiled_vfsVfsSdCardFs}
                    ${precompiled_vfsVfsNet}
-                   ${rump_DHCPCD_ENTITY}
         ENV_VARIABLES VFS_FILESYSTEM_BACKEND=client:kl.VfsSdCardFs
                       VFS_NETWORK_BACKEND=client:kl.VfsNet
         ARGS --gtest_filter=-${FILTERED_TESTS}

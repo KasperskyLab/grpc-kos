@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * © 2025 AO Kaspersky Lab
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 
 #include <grpc/support/port_platform.h>
@@ -96,5 +98,22 @@ void gpr_subprocess_interrupt(gpr_subprocess* p) {
     kill(p->pid, SIGINT);
   }
 }
+#elif defined(__KOS__)
+
+#include <grpc/support/log.h>
+#include "test/core/util/subprocess.h"
+
+#define NOT_SUPPORTED_ON_KOS(FN)                               \
+FN                                                             \
+{                                                              \
+  gpr_log(GPR_ERROR, "%s not supported in KasperskyOS", #FN); \
+  abort();                                                 \
+}
+
+NOT_SUPPORTED_ON_KOS(const char* gpr_subprocess_binary_extension())
+NOT_SUPPORTED_ON_KOS(gpr_subprocess* gpr_subprocess_create(int, const char**))
+NOT_SUPPORTED_ON_KOS(void gpr_subprocess_destroy(gpr_subprocess*))
+NOT_SUPPORTED_ON_KOS(int gpr_subprocess_join(gpr_subprocess*))
+NOT_SUPPORTED_ON_KOS(void gpr_subprocess_interrupt(gpr_subprocess* p))
 
 #endif /* GPR_POSIX_SUBPROCESS */
