@@ -1,5 +1,12 @@
 # Changelog
- 
+
+## Release for KasperskyOS Community Edition SDK 1.4 - 2026-03
+
+### Changes
+
+* Switched to a patch file scenario to demonstrate the KasperskyOS adaptation
+* Updated upstream version
+
 ## Release for KasperskyOS Community Edition SDK 1.3 - 2025-07
 
 ### Changes

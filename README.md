@@ -1,350 +1,162 @@
-# KasperskyOS modification of gRPC
+# KasperskyOS adaptation patch for gRPC
 
-gRPC® (Google Remote Procedure Call) is a high-performance framework for developing distributed systems.
-It uses HTTP/2 and [Protocol Buffers (Protobuf™)](https://github.com/google/protobuf) as the underlying
-protocols for data exchange between clients and servers.
+This project provides an adaptation patch for
+[gRPC® (Google Remote Procedure Call)](https://github.com/grpc/grpc), enabling its use in
+KasperskyOS-based solutions. The project is based on the
+[1.48.0](https://github.com/grpc/grpc/tree/v1.48.0) version.
 
-This project is an adaptation of gRPC for KasperskyOS. It is based on the original version of
-[grpc 1.48.0](https://github.com/grpc/grpc/tree/v1.48.0) and includes an example that demonstrates its
-use in KasperskyOS.
+gRPC is a high-performance framework for developing distributed systems. It uses HTTP/2 and
+[Protocol Buffers (Protobuf™)](https://github.com/google/protobuf) as the underlying protocols for
+data exchange between clients and servers.
 
-For additional details on KasperskyOS, including its limitations and known issues, please refer to the
-[KasperskyOS Community Edition Online Help](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=community_edition).
+For additional details on KasperskyOS, including its limitations and known issues, please refer to
+the [KasperskyOS Community Edition Online Help](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.4&customization=KCE&helpid=community_edition).
 
 ## Table of contents
-- [KasperskyOS modification of gRPC](#kasperskyos-modification-of-grpc)
+- [KasperskyOS adaptation patch for gRPC](#kasperskyos-adaptation-patch-for-grpc)
   - [Table of contents](#table-of-contents)
-  - [Overview](#overview)
-    - [Repository status](#repository-status)
-    - [Interface](#interface)
-    - [Surface API](#surface-api)
-      - [Synchronous vs. asynchronous](#synchronous-vs-asynchronous)
-  - [Streaming](#streaming)
-  - [Protocol](#protocol)
-    - [Abstract gRPC protocol](#abstract-grpc-protocol)
-    - [Implementation over HTTP/2](#implementation-over-http2)
-    - [Flow control](#flow-control)
   - [Getting started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Building and installing](#building-and-installing)
       - [Protoc compiler](#protoc-compiler)
-      - [Build gRPC for Linux host operation system](#build-grpc-for-linux-host-operation-system)
+      - [Build gRPC for Linux host operating system](#build-grpc-for-linux-host-operating-system)
       - [Build gRPC for KasperskyOS](#build-grpc-for-kasperskyos)
-      - [Tests](#tests)
   - [Usage](#usage)
-- [Trademarks](#trademarks)
-- [Contributing](#contributing)
-- [Licensing](#licensing)
-
-## Overview
-
-Remote Procedure Calls (RPCs) provide a useful abstraction for building distributed applications and services.
-The libraries in this repository provide a concrete implementation of the gRPC protocol, layered over HTTP/2.
-These libraries enable communication between clients and servers using any combination of the supported languages.
-
-### Repository status
-
-This repository contains source code for gRPC libraries for multiple languages written on top of shared C core library
-[./src/core](src/core), but the KasperskyOS adaptation is realized only for C++.
-
-### Interface
-
-Developers using gRPC typically start with the description of an RPC service (a collection of methods),
-and generate client and server side interfaces which they use on the client-side and implement on the server side.
-
-By default, gRPC uses Protocol Buffers as the gRPC Interface Definition Language (IDL) for describing both the service interface
-and the structure of the payload messages. It is possible to use other alternatives if desired.
-
-### Surface API
-
-Starting from an interface definition in a `*.proto` file, gRPC provides Protocol Compiler plugins that generate Client- and
-Server-side APIs. gRPC users typically call into these APIs on the Client side and implement the corresponding API on the server side.
-
-#### Synchronous vs. asynchronous
-
-Synchronous RPC calls, that block until a response arrives from the server,
-are the closest approximation to the abstraction of a procedure call that RPC aspires to.
-
-On the other hand, networks are inherently asynchronous and in many scenarios,
-it is desirable to have the ability to start RPCs without blocking the current thread.
-
-The gRPC programming surface in most languages comes in both synchronous and asynchronous flavors.
-
-[⬆ Back to Top](#table-of-contents)
-
-## Streaming
-
-gRPC supports streaming semantics, where either the client or the server (or both) sends a stream of messages on a single RPC call.
-The most general case is Bidirectional Streaming where a single gRPC call establishes a stream where both the client and the server
-can send a stream of messages to each other. The streamed messages are delivered in the order they were sent.
-
-## Protocol
-
-The [gRPC protocol](doc/PROTOCOL-HTTP2.md) specifies the abstract requirements for communication between clients and servers.
-A concrete embedding over HTTP/2 completes the picture by fleshing out the details of each of the required operations.
-
-### Abstract gRPC protocol
-
-A gRPC comprises of a bidirectional stream of messages, initiated by the client. In the client-to-server direction,
-this stream begins with a mandatory `Call Header`, followed by optional `Initial-Metadata`, followed by zero or more `Payload Messages`.
-The server-to-client direction contains an optional `Initial-Metadata`, followed by zero or more `Payload Messages` terminated
-with a mandatory `Status` and optional `Status-Metadata` (or `Trailing-Metadata`).
-
-### Implementation over HTTP/2
-
-The abstract gRPC protocol is implemented over [HTTP/2](https://http2.github.io/).
-gRPC bidirectional streams are mapped to HTTP/2 streams.
-The contents of `Call Header` and `Initial Metadata` are sent as HTTP/2 headers and subject to HPACK compression.
-`Payload Messages` are serialized into a byte stream of length prefixed gRPC frames
-which are then fragmented into HTTP/2 frames at the sender and reassembled at the receiver.
-`Status` and `Trailing-Metadata` are sent as HTTP/2 trailing headers (or trailers).
-
-### Flow control
-
-gRPC inherits the flow control mechanisms in HTTP/2 and uses them
-to enable fine-grained control of the amount of memory used for buffering in-flight messages.
-
-[⬆ Back to Top](#table-of-contents)
+  - [Trademarks](#trademarks)
+  - [Contributing](#contributing)
+  - [Licensing](#licensing)
 
 ## Getting started
 
 ### Prerequisites
 
-1. [Install](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=sdk_install_and_remove)
-KasperskyOS Community Edition SDK. You can download the latest version of the KasperskyOS Community Edition for free from
-[os.kaspersky.com](https://os.kaspersky.com/development/). The minimum required version of KasperskyOS Community Edition SDK is 1.3.
-For more information, see [System requirements](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=system_requirements).
-2. Clone gRPC for KasperskyOS repository to your project directory (to reduce cloning time you can use `--depth 1` option):
-    ```sh
-     $ git clone --recurse-submodules --shallow-submodules https://github.com/KasperskyLab/grpc-kos.git
-    ```
-3. NTP is a networking protocol for clock synchronization between computer systems.
-   NTP is necessary to gRPC to ensure ssl-encrypted connections between server and client tasks located on different hardware.
-   When it is impossible to access external NTP services, it is recommended to run a local NTP service on the host.
-   The following step shows how to install the NTP server using `apt`:
-    ```sh
-     $ sudo apt install ntp
-    ```
+1. Confirm that your host system meets all the
+[System requirements](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.4&customization=KCE&helpid=system_requirements)
+listed in the KasperskyOS Community Edition Developer's Guide.
+1. [Install](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.4&customization=KCE&helpid=sdk_install_and_remove)
+the KasperskyOS Community Edition SDK version 1.4. You can download it for free from
+[os.kaspersky.com](https://os.kaspersky.com/development/).
+1. Copy the source files of this adaptation patch to your local project directory.
+1. Source the SDK setup script to configure the build environment. This exports the `KOSCEDIR`
+  environment variable, which points to the SDK installation directory:
+   ```sh
+   source /opt/KasperskyOS-Community-Edition-<platform>-<version>/common/set_env.sh
+   ```
 
 ### Building and installing
 
-gRPC is built using the CMake build system, which is provided in the KasperskyOS Community Edition SDK.
-In order to use gRPC for KasperskyOS and the host, it is necessary to install gRPC on both platforms.
-It is recommended to use the same gRPC version for KasperskyOS and other platforms.
+The KasperskyOS-adapted version of gRPC is built using the CMake build system, which is provided in
+the KasperskyOS Community Edition SDK. When you develop a KasperskyOS-based solution, use the
+[recommended structure of project directories](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.4&customization=KCE&helpid=cmake_using_sdk_cmake)
+to simplify the use of CMake scripts.
+
+In order to use gRPC for KasperskyOS and the host, it is necessary to install gRPC on both
+platforms. It is recommended to use the same gRPC version for KasperskyOS and other platforms.
 
 #### Protoc compiler
 
-By default, gRPC uses protocol buffers, you will need the `protoc` compiler to generate stub server and client code.
+By default, gRPC uses protocol buffers. You will need the `protoc` compiler to generate stub server
+and client code.
 
-If you compile gRPC from source, the Makefile will automatically try to compile the `protoc` compiler from the
-[./third_party](third_party) directory. This will happen if you have recursively cloned the repository and it detects
-that the `protoc` compiler has not installed on your system yet.
+If you compile gRPC from source, the build system will automatically try to compile the `protoc`
+compiler. This will happen if you have recursively cloned the repository and it detects that the
+`protoc` compiler has not been installed on your system yet.
 
-#### Build gRPC for Linux host operation system
+#### Build gRPC for Linux host operating system
 
-The gRPC is cross-compiled on the host where the KasperskyOS Community Edition SDK is installed.
-To compile `*.proto` files and use gRPC plugins, it is necessary to first build and install gRPC for the host.
-The `protoc` compiler (used to compile `*.proto` files) must be built with the host toolchain.
-This is because the `protoc` will be run on the host when building solutions for KasperskyOS.
+gRPC is cross-compiled on the host where the KasperskyOS Community Edition SDK is installed. To
+compile `*.proto` files and use gRPC plugins, it is necessary to first build and install gRPC for
+the host. The `protoc` compiler (used to compile `*.proto` files) must be built with the host
+toolchain. This is because the `protoc` will be run on the host when building solutions for
+KasperskyOS.
 
-To build and install gRPC for the host, go to the `./kos` directory and execute the [`host-build.sh`](./kos/host-build.sh) script.
-The environment variable `INSTALL_PREFIX` specifies the installation path of gRPC for the host.
-If not specified, gRPC for the host will be installed in the `./install/host` directory.
-
-Syntax for using the `host-build.sh` script:
+To build and install gRPC for the host, execute the following commands:
 ```sh
-$ host-build.sh [-i INSTALL_PREFIX]
-```
-The parameter `-i, --install-prefix INSTALL_PREFIX` specifies the installation path of gRPC for the host.
-The value specified in this parameter takes precedence over the value of the `INSTALL_PREFIX` environment variable.
-
-By default, the build type is set to `Debug`, the build libraries are static,
-and the build path is set to `./build/host`. To change this, edit the `host-build.sh` script as needed.
-
-For example:
-```sh
-$ ./host-build.sh
+cmake -B build/host \
+      -D CMAKE_INSTALL_PREFIX=~/.local/share/kos/$(basename $KOSCEDIR)/toolchain
+cmake --build build/host -j`nproc` --target install
 ```
 
-You also can build gRPC for corresponding host [manually](BUILDING.md).
-
-[⬆ Back to Top](#table-of-contents)
+Set `CMAKE_INSTALL_PREFIX` to your preferred installation path. For compatibility with the
+[gRPC example](https://github.com/KasperskyLab/kos-ce-extra/tree/master/examples/grpc), we recommend
+setting the `CMAKE_INSTALL_PREFIX` to `~/.local/share/kos/$(basename $KOSCEDIR)/toolchain`.
 
 #### Build gRPC for KasperskyOS
 
-To build and install gRPC for KasperskyOS, go to the `./kos` directory and execute the [`cross-build.sh`](./kos/cross-build.sh) script.
-There are environment variables that affect the build and installation of the libraries:
+To build and install gRPC for KasperskyOS, execute the following commands:
 
-* `SDK_PREFIX` specifies the path to the installed version of the KasperskyOS Community Edition SDK.
-* `INSTALL_PREFIX` specifies the installation path of gRPC for KasperskyOS.
-If not specified, the libraries will be installed in the `./install/kos` directory.
-* `TARGET` specifies the target platform. If not specified, the platform will be determined automatically.
+```sh
+cmake -B build/kos \
+      -D CMAKE_TOOLCHAIN_FILE=$KOSCEDIR/toolchain/share/toolchain-aarch64-kos.cmake \
+      -D CMAKE_SYSTEM_PREFIX_PATH=~/.local/share/kos/$(basename $KOSCEDIR)/toolchain \
+      -D CMAKE_INSTALL_PREFIX=~/.local/share/kos/$(basename $KOSCEDIR)/sysroot-aarch64-kos
+cmake --build build/kos -j`nproc` --target install
+```
 
-Syntax for using the `cross-build.sh` script:
-
-`$ SDK_PREFIX=/opt/KasperskyOS-Community-Edition-<version> [TARGET="aarch64-kos"] ./cross-build.sh [-h] [-s PATH] [-i PATH] [-H PATH] [-j N]`,
-
-where:
-
-* `version`
-
-  Latest version number of the [KasperskyOS Community Edition SDK](https://os.kaspersky.com/development/).
-* `-h, --help`
-
-  Help text.
-* `-s, --sdk PATH`
-
-  Path to the installed version of the KasperskyOS Community Edition SDK.
-The path must be set using either the value of the `SDK_PREFIX` environment variable or the `-s` option.
-The value specified in the `-s` option takes precedence over the value of the `SDK_PREFIX` environment variable.
-* `-i, --install PATH`
-
-  Path to directory where gRPC for KasperskyOS will be installed. If not specified, the default path `./install/kos` will be used.
-The value specified in the `-i` option takes precedence over the value of the `INSTALL_PREFIX` environment variable.
-* `-H, --host-install PATH`
-
-  Path to the directory where gRPC for the host is installed. If not specified, the default path `./install/host` will be used.
-* `-j, --jobs N`
-
-  Number of jobs for parallel build. If not specified, the default value is 1.
-
-By default, the build type is set to `Debug`, the build libraries are static,
-and the build path is set to `./build/kos`. To change this, edit the `cross-build.sh` script as needed.
-
-For CMake build system to find gRPC for KasperskyOS, make sure that the directory where the libraries were installed
-is listed in the `CMAKE_FIND_ROOT_PATH` environment variable.
-
-The `cross-build.sh` script builds only runtime libraries.
-The host `protoc` compiler and `gRPC plugin` are used to generate source files from `*.proto` files.
-
-[⬆ Back to Top](#table-of-contents)
-
-#### Tests
-
-The C++ gRPC tests have been adapted to run on KasperskyOS.
-The CMake files for building the tests are located in the [`./test/kos`](test/kos/cmake/) directory.
-The tests have the following limitations:
-
-* Some tests are disabled. See the list at
-[./test/kos/cmake/grpc_cpp_disabled_tests.cmake](test/kos/cmake/grpc_cpp_disabled_tests.cmake).
-* Death tests not supported in KasperskyOS.
-* Some tests are skipped. See the list at [./test/kos/cmake/tests.cmake](test/kos/cmake/tests.cmake).
-* Flaky tests:
-  * `streaming_throughput_test`
-  * `async_end2end_test`
-  * `cli_call_test`
-  * `client_interceptors_end2end_test`
-  * `context_allocator_end2end_test`
-  * `delegating_channel_test`
-  * `google_c2p_resolver_test`
-  * `grpc_authz_end2end_test`
-  * `service_config_end2end_test`
-  * `shutdown_test`
-  * `xds_credentials_end2end_test`
-* C++ unit tests for KasperskyOS are currently available only for QEMU.
-
-Tests use an out-of-source build. The build tree is situated in the generated `./build/kos_tests` directory.
-For each test suite, a separate image will be created. As it can be taxing on disk space, the tests will run sequentially.
-
-To build and run the tests, go to the `./kos` directory and execute the [`run-tests.sh`](./kos/run-tests.sh) script.
-There are environment variables that affect the build and installation of the tests:
-
-* `SDK_PREFIX` specifies the path to the installed version of the KasperskyOS Community Edition SDK.
-* `TARGET` specifies the target platform. (Currently only the `aarch64-kos` platform is supported.)
-
-Syntax for using the `run-tests.sh` script:
-
-`$ SDK_PREFIX=/opt/KasperskyOS-Community-Edition-<version> [TARGET="aarch64-kos"] ./run-tests.sh [--help] [-s PATH] [--list] [-n TEST_1] ... [-n TEST_N] [-t SEC] [-o PATH] [-j N] [-H PATH]`,
-
-where:
-
-* `version`
-
-  Latest version number of the [KasperskyOS Community Edition SDK](https://os.kaspersky.com/development/).
-* `-h, --help`
-
-  Help text.
-* `-s, --sdk PATH`
-
-  Path to the installed version of the KasperskyOS Community Edition SDK.
-The path must be set using either the value of the `SDK_PREFIX` environment variable or the `-s` option.
-The value specified in the `-s` option takes precedence over the value of the `SDK_PREFIX` environment variable.
-* `-l, --list`
-
-  List of tests that can be run.
-* `-n, --name TEST`
-
-  Test name to execute. The parameter can be repeated multiple times.
-If not specified, all tests will be executed.
-* `-t, --timeout SEC`
-
-  Time, in seconds, allotted to start and execute a single test case. Default value is 3000 seconds.
-* `-o, --out PATH`
-
-  Path where the results of the test run will be stored. If not specified, the results will be stored in the `./build/kos_tests/logs` directory.
-* `-j, --jobs N`
-
-  Number of jobs for parallel build. If not specified, the default value obtained from the `nproc` command is used.
-* `-H, --host-install PATH`
-
-  Path to the directory where gRPC for the host is installed. If not specified, the default path `./install/host` will be used.
+Set `CMAKE_INSTALL_PREFIX` to your preferred installation path. To ensure the build system can
+locate the host gRPC dependencies, point `CMAKE_SYSTEM_PREFIX_PATH` to the directory where you
+installed gRPC for the host.
 
 [⬆ Back to Top](#table-of-contents)
 
 ## Usage
 
-When you develop a KasperskyOS-based solution, use the
-[recommended structure of project directories](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.3&customization=KCE&helpid=cmake_using_sdk_cmake)
-to simplify usage of CMake scripts.
+To integrate the KasperskyOS-adapted gRPC into your solution, first build and install
+it for the [host](#build-grpc-for-linux-host-operating-system) and
+[KasperskyOS](#build-grpc-for-kasperskyos).
 
-For more on using gRPC in KasperskyOS, see the [README.md](./examples/kos/helloworld/README.md) file for the project's example.
+For a practical implementation of using gRPC in KasperskyOS, refer to the
+[gRPC example](https://github.com/KasperskyLab/kos-ce-extra/tree/master/examples/grpc) in the
+`KasperskyLab/kos-ce-extra` repository, which demonstrates this exact workflow.
 
-# Trademarks
+## Trademarks
 
 Registered trademarks and endpoint marks are the property of their respective owners.
 
-gRPC, Kubernetes are registered trademarks of The Linux Foundation in the United States and other countries.
+AIX is a trademark of International Business Machines Corporation, registered in many jurisdictions
+worldwide.
 
-Android, Chromium, Closure, Dart, Firebase, GoogleTest, Google Go, Protobuf, TensorFlow are trademarks of Google LLC.
+Android, Google, and PROTOBUF are trademarks of Google LLC.
 
-Linux is the registered trademark of Linus Torvalds in the U.S. and other countries.
+Apache is either a registered trademark or a trademark of the Apache Software Foundation in the
+United States and/or other countries.
 
-Raspberry Pi is a trademark of the Raspberry Pi Foundation.
+Apple, macOS, and Objective-C are trademarks of Apple Inc.
 
-AFS, AIX, IBM, s3 are trademarks of International Business Machines Corporation, registered in many jurisdictions worldwide.
-
-AMD is a trademark or a registered trademark of Advanced Micro Devices, Inc.
-
-F5 is a trademark of F5 Networks, Inc. in the U.S. and in certain other countries.
+Docker and the Docker logo are trademarks or registered trademarks of Docker, Inc. in the United
+States and/or other countries. Docker, Inc. and other parties may also have trademark rights in
+other terms used herein.
 
 FreeBSD is a registered trademark of The FreeBSD Foundation.
 
-MSDN, Microsoft, PowerShell, Visual C++, Visual Studio, Win32, Windows, Windows Server are trademarks of the Microsoft group of companies.
+GITHUB is a trademark of GitHub, Inc., registered in the United States and other countries.
 
-Mac, macOS, Mac OS, OS X, Objective-C, Rosetta, Xcode are trademarks of Apple Inc.
+GRPC is a registered trademark of The Linux Foundation in the United States and other countries.
 
-Firefox, Mozilla are trademarks of the Mozilla Foundation in the U.S. and other countries.
-
-Pentium, Intel are trademarks of Intel Corporation or its subsidiaries.
+Linux is the registered trademark of Linus Torvalds in the U.S. and other countries.
 
 Python is a trademark or registered trademark of the Python Software Foundation.
 
-Fedora, Red Hat are trademarks or registered trademarks of Red Hat, Inc. or its subsidiaries in the United States and other countries.
+Raspberry Pi is a trademark of the Raspberry Pi Foundation.
 
-Symantec is a registered trademark of Symantec Corporation or its affiliates in the U.S. and other countries.
+Solaris is a registered trademark of Oracle and/or its affiliates.
 
-UNIX is a registered trademark in the United States and other countries, licensed exclusively through X/Open Company Limited.
+UNIX is a registered trademark in the United States and other countries, licensed exclusively
+through X/Open Company Limited.
 
-IOS is a registered trademark of Cisco Systems, Inc. and/or its affiliates in the United States and certain other countries.
+Visual Studio, Win32, and Windows are trademarks of the Microsoft group of companies.
 
-# Contributing
+## Contributing
 
-Only KasperskyOS-specific changes can be approved. See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed instructions on code contribution.
+Only KasperskyOS-specific changes can be approved. See [CONTRIBUTING.md](CONTRIBUTING.md) for
+detailed instructions on code contribution.
 
-# Licensing
+## Licensing
 
-This project is licensed under the terms of the Apache License. See [LICENSE](LICENSE) for more information.
+This project is licensed under the terms of the MIT license. See [LICENSE](LICENSE) for more information.
 
-[⬆ Back to Top](#table-of-contents)
+This project comprises publication(s) intended to be used with [gRPC library](https://github.com/grpc/grpc/tree/v1.48.0) ( “Upstream Project”).
+The Upstream Project is licensed and distributed under its own license terms, which are separate from the terms of this project.
+Nothing in this repository is intended to modify, replace, supersede, or relicense the Upstream Project or any of its components.
 
-© 2025 AO Kaspersky Lab
+© 2026 AO Kaspersky Lab
