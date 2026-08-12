@@ -10,7 +10,7 @@ gRPC is a high-performance framework for developing distributed systems. It uses
 data exchange between clients and servers.
 
 For additional details on KasperskyOS, including its limitations and known issues, please refer to
-the [KasperskyOS Community Edition Online Help](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.4&customization=KCE&helpid=community_edition).
+the [KasperskyOS Community Edition Online Help](https://kas.pr/bb4o).
 
 ## Table of contents
 - [KasperskyOS adaptation patch for gRPC](#kasperskyos-adaptation-patch-for-grpc)
@@ -31,11 +31,11 @@ the [KasperskyOS Community Edition Online Help](https://click.kaspersky.com/?hl=
 ### Prerequisites
 
 1. Confirm that your host system meets all the
-[System requirements](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.4&customization=KCE&helpid=system_requirements)
+[System requirements](https://kas.pr/xj4q)
 listed in the KasperskyOS Community Edition Developer's Guide.
-1. [Install](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.4&customization=KCE&helpid=sdk_install_and_remove)
+1. [Install](https://kas.pr/6sdm)
 the KasperskyOS Community Edition SDK version 1.4. You can download it for free from
-[os.kaspersky.com](https://os.kaspersky.com/development/).
+[os.kaspersky.com](https://kas.pr/27dx).
 1. Copy the source files of this adaptation patch to your local project directory.
 1. Source the SDK setup script to configure the build environment. This exports the `KOSCEDIR`
   environment variable, which points to the SDK installation directory:
@@ -47,7 +47,7 @@ the KasperskyOS Community Edition SDK version 1.4. You can download it for free 
 
 The KasperskyOS-adapted version of gRPC is built using the CMake build system, which is provided in
 the KasperskyOS Community Edition SDK. When you develop a KasperskyOS-based solution, use the
-[recommended structure of project directories](https://click.kaspersky.com/?hl=en-us&link=online_help&pid=kos&version=1.4&customization=KCE&helpid=cmake_using_sdk_cmake)
+[recommended structure of project directories](https://kas.pr/2gat)
 to simplify the use of CMake scripts.
 
 In order to use gRPC for KasperskyOS and the host, it is necessary to install gRPC on both
@@ -78,7 +78,7 @@ cmake --build build/host -j`nproc` --target install
 ```
 
 Set `CMAKE_INSTALL_PREFIX` to your preferred installation path. For compatibility with the
-[gRPC example](https://github.com/KasperskyLab/kos-ce-extra/tree/master/examples/grpc), we recommend
+[gRPC example](https://kas.pr/f287), we recommend
 setting the `CMAKE_INSTALL_PREFIX` to `~/.local/share/kos/$(basename $KOSCEDIR)/toolchain`.
 
 #### Build gRPC for KasperskyOS
@@ -106,7 +106,7 @@ it for the [host](#build-grpc-for-linux-host-operating-system) and
 [KasperskyOS](#build-grpc-for-kasperskyos).
 
 For a practical implementation of using gRPC in KasperskyOS, refer to the
-[gRPC example](https://github.com/KasperskyLab/kos-ce-extra/tree/master/examples/grpc) in the
+[gRPC example](https://kas.pr/f287) in the
 `KasperskyLab/kos-ce-extra` repository, which demonstrates this exact workflow.
 
 ## Trademarks
